@@ -16,8 +16,9 @@ script.on_init(function()
   if not target then
     fail("could not create doomed ballistic target")
   end
+  game.surfaces[1].create_entity({name="shahed-attack-ballistic-site",position={-900,0},force="enemy",raise_built=true})
   local result = remote.call("shahed_attack", "schedule_event", {
-    kind = "ballistic",
+    kind = "ballistic", source_position={x=-900,y=0},
     surface_index = surface.index,
     target_force_name = "player",
     target_position = target.position

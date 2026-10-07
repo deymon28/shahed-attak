@@ -1,4 +1,37 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.7.0
+Date: 2026-10-07
+  Features:
+    - Threat progression for both drones and missiles: raids grow from small groups into mass raids of up to 40 aircraft; ballistic strikes start as single light, inaccurate missiles and grow into salvos of medium and heavy missiles.
+    - Mass raids fly in groups of up to eight that take off apart and approach from different bearings.
+    - Decoy drones, attacks on air-defense positions and raids sized against defenses known from reconnaissance.
+    - Combined strikes: some raids are accompanied by a missile salvo timed to arrive together with the drones.
+    - Trains are targets; drones follow a train and attack it directly when close.
+    - Anti-air wagon and missile-defense wagon with script-aimed turret mounts, unlocked by two new technologies.
+    - Missile-defense fire doctrine (interceptors in flight per target, shoot-look-shoot) and launcher magazines of four ready canisters.
+    - AA, missile-defense and optional radar ranges on the map view, switchable per player.
+    - Air war statistics window (shortcut and /shahed-attack stats).
+    - Commands: help, stats, sources, mass-raid, clear, and size/salvo arguments; status is localized.
+    - New settings: maximum raid size, grace period, decoys, attacks on air defenses, adaptive raids, maximum drones in the air, earliest ballistic day, ballistic start evolution, preparation time, maximum salvo, ballistic damage, interceptors per target, map range display.
+  Changes:
+    - Every attack, including admin commands and remote calls, starts at a real enemy airfield or launch site.
+    - The air war takes place on Nauvis only.
+    - Strike and heavy drones are weaker (warheads 140 and 320, airframes 150 and 320 HP); the threat comes from numbers.
+    - Missile-defense batteries and interceptors are cheaper and available earlier (no military 3, no processing units or low density structures).
+    - Ballistic attempts are scheduled by time instead of only at dusk.
+    - Interceptor hit probability depends on the target: light missiles and drones are easier, heavy missiles harder.
+    - Air-raid and ballistic alerts use separate icons; interceptor results follow the detailed-alerts setting.
+  Bugfixes:
+    - Disabling ballistic strikes or reconnaissance in the settings had no effect.
+    - Mixed raids added a reconnaissance drone while reconnaissance was disabled.
+    - Target lists kept destroyed buildings forever, growing the save and making target selection fail in long games.
+    - The record of inspected biter nests grew without limit.
+    - Deleting a surface left its targets, scan queues and sound cooldowns behind.
+    - Interceptors whose target was destroyed vanished in mid-air; they now self-destruct.
+    - Turrets from other mods could shoot drones; every ground turret now ignores aircraft.
+  Optimizations:
+    - Radar coverage of missiles is re-evaluated twice a second instead of every tick; hidden radar relay wiring is no longer re-checked every second; idle surfaces skip drone, missile and projectile updates.
+---------------------------------------------------------------------------------------------------
 Version: 0.6.7
 Date: 2026-09-05
   Features:

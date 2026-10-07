@@ -21,8 +21,9 @@ script.on_init(function()
     raise_built = true
   })
   local requested_origin = {x = 0, y = -25}
+  game.surfaces[1].create_entity({name="shahed-attack-airfield",position=requested_origin,force="enemy",raise_built=true})
   local result = remote.call("shahed_attack", "schedule_event", {
-    kind = "recon",
+    kind = "recon", stagger=false,
     surface_index = surface.index,
     target_force_name = "player",
     target_position = target.position,

@@ -17,8 +17,11 @@ script.on_init(function()
     end
   end
 
+  -- The maximum raid size is a map setting (default 40); verify it is enforced.
+  assert(remote.call("shahed_attack", "set_setting", "shahed-attack-max-raid-size", 12).ok, "SHAHED_TEST_FAIL: set raid cap")
+  game.surfaces[1].create_entity({name="shahed-attack-airfield",position={0,-200},force="enemy",raise_built=true})
   local result = remote.call("shahed_attack", "schedule_event", {
-    kind = "raid",
+    kind = "raid", stagger=false,
     surface_index = 1,
     target_force_name = "player",
     target_position = {10, 0},
@@ -39,5 +42,5 @@ script.on_nth_tick(60, function(event)
   if count ~= 12 then
     fail(string.format("raid hard cap was not enforced: expected=12 actual=%d", count))
   end
-  log("SHAHED_TEST_PASS all raid entry points enforce the twelve-drone hard cap")
+  log("SHAHED_TEST_PASS raid entry points enforce the configured maximum raid size")
 end)

@@ -235,7 +235,18 @@ function infrastructure.get_source(surface_state, source_type, target_position, 
 end
 
 -- Source of a type closest to a position, within a radius (scripted events).
-function infrastructure.source_near(surface_state, source_type, position, radius)
+-- The surface is searched too, so bases placed by another script before this
+-- mod's on_init ran are found and registered.
+function infrastructure.source_near(surface_state, source_type, position, radius, surface)
+  if surface then
+    for name, kind in pairs(SOURCE_NAMES) do
+      if kind == source_type then
+        for _, entity in ipairs(surface.find_entities_filtered({name = name, position = position, radius = radius})) do
+          register_source(entity, source_type)
+        end
+      end
+    end
+  end
   local best, best_distance
   for _, entity in pairs(surface_state.sources[source_type] or {}) do
     if entity.valid then

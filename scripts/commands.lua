@@ -173,7 +173,7 @@ local function remote_schedule(request)
   local hint = request.source_position or request.origin_position
   local source
   if hint then
-    source = infrastructure.source_near(surface_state, source_type, hint, SOURCE_SEARCH_RADIUS)
+    source = infrastructure.source_near(surface_state, source_type, hint, SOURCE_SEARCH_RADIUS, surface)
     if not source then
       return {ok = false, error = "no-source"}
     end
@@ -336,6 +336,15 @@ function commands_api.register()
       end
       settings.global["shahed-attack-intercept-accuracy"] = {value = value}
       return {ok = true}
+    end,
+    -- Changes one of this mod's map settings (other mods and scenarios cannot
+    -- write them directly). Returns {ok, error}.
+    set_setting = function(name, value)
+      if type(name) ~= "string" or not name:find("^shahed%-attack%-") or settings.global[name] == nil then
+        return {ok = false, error = "unknown-setting"}
+      end
+      local ok = pcall(function() settings.global[name] = {value = value} end)
+      return ok and {ok = true} or {ok = false, error = "invalid-value"}
     end,
     schedule_event = remote_schedule,
     get_surface_state = remote_state,

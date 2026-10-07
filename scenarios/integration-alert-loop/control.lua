@@ -26,7 +26,8 @@ script.on_event(defines.events.on_tick, function(event)
   if tick==120 then
     check(status.global_warning_dispatches==0,'idle world has no global warning playback')
     check((status.audio_counters['shahed-attack-radar-ping'] or 0)==0,'idle radar does not dispatch beeps')
-    check(remote.call('shahed_attack','schedule_event',{kind='recon',surface_index=surface.index,
+    game.surfaces[1].create_entity({name="shahed-attack-airfield",position={-300,0},force="enemy",raise_built=true})
+    check(remote.call('shahed_attack','schedule_event',{kind='recon', stagger=false,surface_index=surface.index,
       target_position=target.position,origin_position={x=-300,y=0},size=1}).ok,'spawn recon approach')
   elseif tick==1100 then
     check(status.global_warning_dispatches>=3,'single detected recon sustains multiple siren cycles')

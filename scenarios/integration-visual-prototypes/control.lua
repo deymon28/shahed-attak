@@ -40,11 +40,11 @@ script.on_init(function()
   local site = create("shahed-attack-ballistic-site", {-160, 0}, hostile_force)
 
   local recon = remote.call("shahed_attack", "schedule_event", {
-    kind = "recon",
+    kind = "recon", stagger=false,
     surface_index = surface.index,
     target_force_name = "player",
     target_position = target.position,
-    origin_position = {x = -80, y = 20},
+    origin_position = {x = 80, y = 80},
     size = 1
   })
   if not recon.ok then fail("could not create radar-alert drone") end

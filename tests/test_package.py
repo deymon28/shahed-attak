@@ -22,9 +22,10 @@ SCRIPTS = {
     "alerts.lua", "audio.lua", "balance.lua", "ballistics.lua", "commands.lua",
     "battery_gui.lua", "defense.lua", "ordnance.lua", "director.lua", "forces.lua", "infrastructure.lua",
     "radar_signals.lua", "raids.lua", "state.lua", "targeting.lua", "visual_effects.lua",
+    "profiler.lua", "range_overlay.lua", "stats_gui.lua",
 }
 SCRIPT_LIBS = {
-    "abm_launch.lua", "abm_launch_geometry.lua",
+    "abm_launch.lua", "abm_launch_geometry.lua", "config.lua",
     "air_rules.lua", "alert_policy.lua", "audio_policy.lua", "defense_math.lua", "flight_math.lua", "random.lua",
 }
 SOUNDS = {

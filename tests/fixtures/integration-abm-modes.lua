@@ -40,8 +40,9 @@ remote.add_interface('shahed_abm_mode_test',{
       if index==2 then mode_select(test.player,battery,3) end
       if index==3 then mode_select(test.player,battery,2) end
       local generator=mode_random.new(1234+index)
+      local airfield=surface.create_entity({name='shahed-attack-airfield',position={x-70,0},force='enemy',raise_built=true})
       local id=raids.spawn_event(surface,game.forces.player,target,'raid',1,
-        {force_external=true,generator=generator,origin_position={x=x-70,y=0}})
+        {source=airfield,generator=generator,stagger=false})
       mode_check(id,'spawn a real tracked Shahed')
       local current=state.get_surface(1)
       for unit,record in pairs(current.active_drones) do
@@ -56,10 +57,12 @@ remote.add_interface('shahed_abm_mode_test',{
       test.missiles[index]=ballistics.launch(surface,game.forces.player,target,site,generator)
     end
     settings.global['shahed-attack-intercept-accuracy']={value=1}
+    -- One interceptor per target keeps the per-battery ammunition accounting exact.
+    settings.global['shahed-attack-interceptors-per-target']={value=1}
     mode_check(mode_select(test.player,test.batteries[2])==3,'independent drone-only choice is retained')
     local current=state.get_surface(1)
     test.next_raid_tick=current.next_raid_tick
-    test.next_ballistic_day=current.next_ballistic_day
+    test.next_ballistic_tick=current.next_ballistic_tick
   end,
   step=function(tick,loaded)
     local test=storage.abm_mode_test
@@ -102,7 +105,7 @@ remote.add_interface('shahed_abm_mode_test',{
       mode_check(current.counters.intercepted==2 and current.counters.interceptor_drone_hits==2,'separate ballistic and drone outcome accounting')
       mode_check(test.batteries[1].get_item_count('shahed-attack-interceptor')==19
         and test.batteries[3].get_item_count('shahed-attack-interceptor')==18,'one ammunition charge per real interception')
-      mode_check(current.next_raid_tick==test.next_raid_tick and current.next_ballistic_day==test.next_ballistic_day,
+      mode_check(current.next_raid_tick==test.next_raid_tick and current.next_ballistic_tick==test.next_ballistic_tick,
         'target selection does not change raid schedules')
       local battery=test.batteries[3]
       local unit=battery.unit_number
@@ -112,6 +115,23 @@ remote.add_interface('shahed_abm_mode_test',{
       mode_gui.update()
       mode_check(not current.battery_modes[unit],'destroyed battery mode is cleaned up')
       mode_check(not test.player.gui.relative['shahed-attack-battery-mode'],'destroyed battery panel is removed')
+      -- Statistics window and per-player map ranges.
+      stats_gui.toggle(test.player)
+      mode_check(test.player.gui.screen['shahed-attack-stats'],'statistics window opens')
+      stats_gui.update()
+      stats_gui.toggle(test.player)
+      mode_check(not test.player.gui.screen['shahed-attack-stats'],'statistics window closes')
+      local function chart_circles_visible()
+        local visible=0
+        for _,object in pairs(rendering.get_all_objects('shahed-attack')) do
+          if object.valid and object.type=='circle' and object.render_mode=='chart' and object.visible then visible=visible+1 end
+        end
+        return visible
+      end
+      mode_check(chart_circles_visible()>0,'defense ranges are shown on the map by default')
+      test.player.mod_settings['shahed-attack-show-defense-ranges']={value=false}
+      range_overlay.refresh()
+      mode_check(chart_circles_visible()==0,'a player can hide defense ranges')
       log('SHAHED_TEST_PASS native GUI, independent modes, priority, real drone interception, saved in-flight target and mode persistence')
       return true
     end

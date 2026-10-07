@@ -115,8 +115,9 @@ script.on_init(function()
     end
   end
 
+  game.surfaces[1].create_entity({name="shahed-attack-airfield",position={-200,0},force="enemy",raise_built=true})
   local raid = remote.call("shahed_attack", "schedule_event", {
-    kind = "raid",
+    kind = "raid", stagger=false, origin_position={x=-200,y=0},
     surface_index = surface.index,
     target_force_name = "player",
     target_position = target.position,
@@ -126,8 +127,9 @@ script.on_init(function()
     fail("raid creation failed: " .. tostring(raid.error))
   end
 
+  game.surfaces[1].create_entity({name="shahed-attack-ballistic-site",position={-900,0},force="enemy",raise_built=true})
   local missile = remote.call("shahed_attack", "schedule_event", {
-    kind = "ballistic",
+    kind = "ballistic", source_position={x=-900,y=0},
     surface_index = surface.index,
     target_force_name = "player",
     target_position = target.position

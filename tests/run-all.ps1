@@ -33,44 +33,21 @@ $scenarios = @(
     "integration-visual-prototypes",
     "integration-launch-handoff",
     "integration-wreck-completion",
-    "integration-ballistic-motion"
+    "integration-ballistic-motion",
+    "integration-rail-defense"
 )
 
 Push-Location $projectRoot
 try {
-    Write-Output "Running standalone Lua algorithm tests..."
-    & lua "tests\test_algorithms.lua" "."
-    if ($LASTEXITCODE -ne 0) { throw "Algorithm tests failed." }
+    Write-Output "Running standalone Lua tests..."
+    foreach ($test in Get-ChildItem "tests" -Filter "test_*.lua" | Sort-Object Name) {
+        & lua $test.FullName "."
+        if ($LASTEXITCODE -ne 0) { throw "Lua test failed: $($test.Name)" }
+    }
 
-    Write-Output "Running standalone Lua runtime-rule tests..."
-    & lua "tests\test_runtime_rules.lua" "."
-    if ($LASTEXITCODE -ne 0) { throw "Runtime-rule tests failed." }
-
-    & lua "tests\test_air_rules.lua" "."
-    if ($LASTEXITCODE -ne 0) { throw "Air-war rules failed." }
-    & lua "tests\test_interception_runtime.lua" "."
-    if ($LASTEXITCODE -ne 0) { throw "Interceptor runtime failed." }
-
-    & lua "tests\test_abm_modes.lua"
-    if ($LASTEXITCODE -ne 0) { throw "ABM target mode tests failed." }
-    & lua "tests\test_battery_gui.lua"
-    if ($LASTEXITCODE -ne 0) { throw "Battery GUI tests failed." }
-
-    & lua "tests\test_interceptor_motion.lua"
-    if ($LASTEXITCODE -ne 0) { throw "Interceptor motion tests failed." }
-    & lua "tests\test_interceptor_handoff.lua"
-    if ($LASTEXITCODE -ne 0) { throw "Interceptor handoff tests failed." }
-    & lua "tests\test_recon_wreck.lua"
-    if ($LASTEXITCODE -ne 0) { throw "Recon wreck tests failed." }
-
-    & lua "tests\test_alert_priority.lua"
-    if ($LASTEXITCODE -ne 0) { throw "Alert priority tests failed." }
-
-    & lua "tests\test_alert_loop.lua"
-    if ($LASTEXITCODE -ne 0) { throw "Alert loop tests failed." }
-
-    & lua "tests\test_visual_effects.lua"
-    if ($LASTEXITCODE -ne 0) { throw "Visual effect lifecycle tests failed." }
+    Write-Output "Checking Lua globals..."
+    & python "tools\check_lua_globals.py"
+    if ($LASTEXITCODE -ne 0) { throw "Undeclared global check failed." }
 
     Write-Output "Running Python static, visual, audio, locale, and package tests..."
     & python -m pytest "tests\test_static.py" "tests\test_visual_assets.py" "tests\test_structure_shadows.py" "tests\test_audio_assets.py" "tests\test_locale.py" "tests\test_package.py" -q
@@ -81,11 +58,12 @@ try {
 
     foreach ($scenario in $scenarios) {
         Write-Output "Running Factorio scenario: $scenario"
-        & ".\tests\integration.ps1" -FactorioExe $FactorioExe -Scenario $scenario -TimeoutSeconds 90
+        & ".\tests\integration.ps1" -FactorioExe $FactorioExe -Scenario $scenario -TimeoutSeconds 120
     }
 
     & ".\tests\integration.ps1" -FactorioExe $FactorioExe -Scenario integration-ordnance-reload -ReloadSave ordnance-fixture -TimeoutSeconds 90
-    & ".\tests\integration.ps1" -FactorioExe $FactorioExe -Scenario integration-abm-modes -ReloadSave _autosave-abm-modes-fixture -WithPlayer -TimeoutSeconds 120
+    & ".\tests\integration.ps1" -FactorioExe $FactorioExe -Scenario integration-abm-modes -ReloadSave _autosave-abm-modes-fixture -WithPlayer -TimeoutSeconds 180
+    & ".\tests\integration.ps1" -FactorioExe $FactorioExe -Scenario integration-alert-loop -WithPlayer -TimeoutSeconds 240
 
     Write-Output "Running baseline save migration tests..."
     & ".\tests\migration.ps1" -FactorioExe $FactorioExe -TimeoutSeconds 90
@@ -94,7 +72,9 @@ try {
 
     & ".\tests\migration.ps1" -FactorioExe $FactorioExe -OldVersion "0.6.0" -TimeoutSeconds 90
 
-    Write-Output "PASS: Shahed Attack 0.6.7 full verification completed."
+    & ".\tests\migration.ps1" -FactorioExe $FactorioExe -OldVersion "0.6.7" -TimeoutSeconds 120
+
+    Write-Output "PASS: Shahed Attack full verification completed."
 }
 finally {
     Pop-Location

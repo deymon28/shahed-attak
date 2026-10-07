@@ -23,8 +23,9 @@ script.on_init(function()
     raise_built = true
   })
   decoy = surface.create_entity({name = "character", position = {25, 0}, force = game.forces.player})
+  game.surfaces[1].create_entity({name="shahed-attack-airfield",position={0,-30},force="enemy",raise_built=true})
   local result = remote.call("shahed_attack", "schedule_event", {
-    kind = "raid",
+    kind = "raid", stagger=false,
     surface_index = surface.index,
     target_force_name = "player",
     target_position = target.position,

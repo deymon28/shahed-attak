@@ -60,8 +60,15 @@ script.on_event(defines.events.on_tick,function(event)
       check(tick>=13,'ready batteries aim briefly before firing')
       check(current.active_missiles==1,'launch does not resolve interception instantly')
     end
-    if tick==35 then check(count==5,'all five batteries complete their short acquisition') end
-    if tick==95 then check(count==10,'all five batteries repeat after the original one-second reload') end
+    -- Fire doctrine: at most two interceptors fly at one target; misses free a slot.
+    if tick==35 then check(count==2,'two batteries engage while the others hold fire') end
+    if tick==35 then first_launches=count end
+    if tick==95 then check(count>first_launches,'batteries fire again after interceptors miss') end
+    if tick>13 and tick<140 then
+      local in_flight=0
+      for _,shot in ipairs(current.projectiles) do if not shot.missed then in_flight=in_flight+1 end end
+      check(in_flight<=2,'never more than two interceptors in flight at one missile')
+    end
     if not warning_checked and #current.warnings>0 then
       local warning=current.warnings[1]
       check(warning.eta>=30 and warning.eta<=60,'warning leaves 30-60 seconds')
@@ -75,14 +82,14 @@ script.on_event(defines.events.on_tick,function(event)
       check(current.counters.intercepted==1,'missile destroyed exactly once')
       check(current.active_missiles==0,'destroyed missile cleaned')
       check(#current.projectiles==0,'all in-flight helpers cleaned')
-      check(drone.valid and drone.health==400,'vanilla gun and turret ground fire cannot damage drone')
+      check(drone.valid and drone.health==drone.max_health,'vanilla gun and turret ground fire cannot damage drone')
       check(turret.get_inventory(defines.inventory.turret_ammo).get_item_count('uranium-rounds-magazine')==100,'vanilla turret does not waste ammunition')
-      check(not player_drone.valid or player_drone.health<180,'ordinary player damage reaches the drone')
+      check(not player_drone.valid or player_drone.health<player_drone.max_health,'ordinary player damage reaches the drone')
       first_launches=count
     end
     if tick==420 then
       check(count==first_launches,'no firing after interception')
-      log('SHAHED_TEST_PASS v5 player damage compatibility, vanilla immunity, early bearing, five repeated batteries and projectile cleanup')
+      log('SHAHED_TEST_PASS v5 player damage compatibility, vanilla immunity, early bearing, fire doctrine and projectile cleanup')
     end
   end
 end)

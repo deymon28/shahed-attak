@@ -11,8 +11,9 @@ script.on_init(function()
     force = game.forces.player,
     raise_built = true
   })
+  game.surfaces[1].create_entity({name="shahed-attack-airfield",position={-200,0},force="enemy",raise_built=true})
   local result = remote.call("shahed_attack", "schedule_event", {
-    kind = "raid",
+    kind = "raid", stagger=false, origin_position={x=-200,y=0},
     surface_index = surface.index,
     target_force_name = "player",
     target_position = target.position,

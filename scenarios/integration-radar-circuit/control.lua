@@ -87,8 +87,9 @@ script.on_event(defines.events.on_tick, function(event)
     if initial.air_count ~= 0 or initial.ballistic_count ~= 0 then
       fail("new radar relay did not start at zero")
     end
+    game.surfaces[1].create_entity({name="shahed-attack-airfield",position={0,-120},force="enemy",raise_built=true})
     local result = remote.call("shahed_attack", "schedule_event", {
-      kind = "raid",
+      kind = "raid", stagger=false,
       surface_index = 1,
       target_force_name = "player",
       target_position = target.position,
@@ -155,8 +156,9 @@ script.on_event(defines.events.on_tick, function(event)
       if air_red ~= 0 or air_green ~= 0 then
         fail("air signal remained active after the latch expired")
       end
+      game.surfaces[1].create_entity({name="shahed-attack-ballistic-site",position={-900,0},force="enemy",raise_built=true})
       local result = remote.call("shahed_attack", "schedule_event", {
-        kind = "ballistic",
+        kind = "ballistic", source_position={x=-900,y=0},
         surface_index = 1,
         target_force_name = "player",
         target_position = target.position

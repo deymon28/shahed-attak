@@ -18,6 +18,8 @@ script.on_init(function()
   storage.initial_ammo=storage.battery.insert({name="shahed-attack-interceptor",count=100})
   storage.battery.energy=20000000
   remote.call("shahed_attack","set_intercept_accuracy",1)
+  -- One interceptor per target keeps a single in-flight round across the reload.
+  remote.call("shahed_attack","set_setting","shahed-attack-interceptors-per-target",1)
   local result=remote.call("shahed_attack","schedule_event",{kind="ballistic",target_position=storage.target.position,source_position=storage.site.position})
   check(result.ok,"launch reload fixture")
 end)

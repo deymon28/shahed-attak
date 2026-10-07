@@ -561,6 +561,14 @@ function defense.update(tick)
         if wagon.valid then ensure_wagon_head(surface_state, wagon) end
       end
     end
+    -- Destruction events arrive a tick later; drop per-launcher state of
+    -- launchers that are already gone.
+    for _, map in ipairs({surface_state.battery_modes, surface_state.launcher_rounds, surface_state.battery_next_shot}) do
+      for unit in pairs(map) do
+        local launcher = surface_state.defenses.abm_batteries[unit] or surface_state.defenses.abm_wagons[unit]
+        if not (launcher and launcher.valid) then map[unit] = nil end
+      end
+    end
   end
 end
 

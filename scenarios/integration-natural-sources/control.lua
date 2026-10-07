@@ -7,16 +7,30 @@ local saw_raid, saw_ballistic, saw_drone_warning, saw_ballistic_warning
 local removed_at, raids_after_removal, sources_seen
 local sites_removed_at, ballistic_after_removal, completed
 
+-- The air war is fought on Nauvis only, so the test regenerates Nauvis with
+-- dense biter bases instead of creating a separate surface.
 script.on_init(function()
   game.speed = 1000
   game.map_settings.enemy_expansion.enabled = false
   game.map_settings.pollution.enabled = false
-  surface = game.create_surface("natural-source-test", {
-    seed = 351947, width = 2048, height = 512, water = 0,
-    starting_area = 0.1,
-    autoplace_controls = {["enemy-base"] = {frequency = 6, size = 4, richness = 1}},
-    cliff_settings = {cliff_elevation_interval = 0}
-  })
+  surface = game.surfaces[1]
+  local settings = surface.map_gen_settings
+  settings.seed = 351947
+  settings.width = 2048
+  settings.height = 512
+  settings.water = 0
+  settings.starting_area = 0.1
+  settings.autoplace_controls = settings.autoplace_controls or {}
+  settings.autoplace_controls["enemy-base"] = {frequency = 6, size = 4, richness = 1}
+  settings.cliff_settings = settings.cliff_settings or {}
+  settings.cliff_settings.cliff_elevation_interval = 0
+  surface.map_gen_settings = settings
+  surface.clear(true)
+end)
+
+local prepared = false
+local function prepare()
+  prepared = true
   surface.ticks_per_day = 2400
   surface.request_to_generate_chunks({384, 0}, 16)
   surface.force_generate_chunk_requests()
@@ -30,10 +44,14 @@ script.on_init(function()
     if entity.type == "unit-spawner" or entity.type == "turret" then entity.active = false end
     if entity.type == "unit" then entity.destroy() end
   end
-end)
+end
 
 script.on_event(defines.events.on_tick, function(event)
   if completed then return end
+  if not prepared then
+    if event.tick >= 2 then prepare() end
+    return
+  end
   radar.energy = 10000000
   if event.tick % 30 ~= 0 then return end
   local current = remote.call("shahed_attack", "get_surface_state", surface.index)

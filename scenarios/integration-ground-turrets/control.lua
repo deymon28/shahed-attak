@@ -33,7 +33,7 @@ script.on_event(defines.events.on_tick,function(event)
   if surface.count_entities_filtered({name="shahed-attack-ground-fire-flame-on-tree"})>0 then burning_tree_seen=true end
   if event.tick==600 then
     check(burning_tree_seen,"stationary flamethrower must ignite an actual tree")
-    for _,entity in ipairs(drones) do check(entity.valid and entity.health==400,"vanilla gun/laser/flame/tree fire cannot damage drones") end
+    for _,entity in ipairs(drones) do check(entity.valid and entity.health==entity.max_health,"vanilla gun/laser/flame/tree fire cannot damage drones") end
     check(gun.get_inventory(defines.inventory.turret_ammo).get_item_count("uranium-rounds-magazine")==100,"vanilla gun ignores drones")
     laser_target=surface.create_entity({name="big-biter",position={80,-8},force="enemy"})
     gun_target=surface.create_entity({name="big-biter",position={160,-8},force="enemy"})
@@ -46,7 +46,7 @@ script.on_event(defines.events.on_tick,function(event)
   end
   if event.tick==900 then
     check(laser_ground_hit and gun_ground_hit,"vanilla turrets still damage ground enemies")
-    for _,entity in ipairs(drones) do check(entity.valid and entity.health==400,"nearby ground combat still spares drones") end
+    for _,entity in ipairs(drones) do check(entity.valid and entity.health==entity.max_health,"nearby ground combat still spares drones") end
     log("SHAHED_TEST_PASS vanilla target exclusion, flamethrower tree-fire immunity, and normal ground combat")
     script.on_event(defines.events.on_tick,nil)
   end

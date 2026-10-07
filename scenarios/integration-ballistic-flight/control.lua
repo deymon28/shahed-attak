@@ -23,10 +23,12 @@ script.on_init(function()
     force = game.forces.player,
     raise_built = true
   })
-  middle = surface.create_entity({name = "storage-tank", position = {12, 0}, force = game.forces.player})
+  -- Heavy missiles keep up to 3 tiles of aim error; the middle ring reaches 14 tiles.
+  middle = surface.create_entity({name = "storage-tank", position = {10, 0}, force = game.forces.player})
   outer = surface.create_entity({name = "storage-tank", position = {28, 0}, force = game.forces.player})
+  game.surfaces[1].create_entity({name="shahed-attack-ballistic-site",position={-900,0},force="enemy",raise_built=true})
   local result = remote.call("shahed_attack", "schedule_event", {
-    kind = "ballistic",
+    kind = "ballistic", class = "heavy", source_position={x=-900,y=0},
     surface_index = surface.index,
     target_force_name = "player",
     target_position = target.position
@@ -48,8 +50,8 @@ script.on_nth_tick(1, function(event)
   if missile.has_sound_source ~= true then
     fail("active ballistic missile has no moving flight sound source")
   end
-  if missile.duration_ticks < 2700 then
-    fail("ballistic flight leaves less than 45 seconds to react")
+  if missile.duration_ticks < 38 * 60 then
+    fail("heavy ballistic flight leaves less than its 38-second minimum to react")
   end
   if not first_position then
     first_position = missile.position

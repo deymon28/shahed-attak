@@ -50,7 +50,7 @@ local function ensure_surface_fields(surface, surface_state)
   local ticks_per_day = math.max(surface.ticks_per_day, 1)
   surface_state.created_tick = surface_state.created_tick or game.tick
   surface_state.next_raid_tick = surface_state.next_raid_tick or (game.tick + 2 * ticks_per_day)
-  surface_state.next_ballistic_tick = surface_state.next_ballistic_tick or game.tick
+  surface_state.next_ballistic_tick = surface_state.next_ballistic_tick or (game.tick + math.floor(ticks_per_day / 4))
   surface_state.rng_state = surface_state.rng_state
     or ((surface.map_gen_settings.seed or 1) + surface.index * 7919) % 2147483647
   surface_state.combat_rng_state = surface_state.combat_rng_state or surface_state.rng_state

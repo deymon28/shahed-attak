@@ -48,8 +48,9 @@ local function spawn_batch(count, radius)
     local motion = {x = math.cos(angle), y = math.sin(angle)}
     local ring = radius + math.floor(index / 8) * 4
     local origin = {x = -motion.x * ring, y = -motion.y * ring}
+    game.surfaces[1].create_entity({name="shahed-attack-airfield",position=origin,force="enemy",raise_built=true})
     local scheduled = remote.call("shahed_attack", "schedule_event", {
-      kind = "recon",
+      kind = "recon", stagger=false,
       surface_index = surface.index,
       target_force_name = "player",
       target_position = target.position,
