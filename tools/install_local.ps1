@@ -50,7 +50,7 @@ Expand-Archive -LiteralPath $archive -DestinationPath $stageRoot
 $newHashes = Get-TreeHashes $stageInstallation
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $zip = [IO.Compression.ZipFile]::OpenRead($archive)
-try { $archiveFiles = @($zip.Entries | Where-Object { -not $_.FullName.EndsWith('/') }).Count } finally { $zip.Dispose() }
+try { $archiveFiles = @($zip.Entries | Where-Object { $_.Name -ne '' }).Count } finally { $zip.Dispose() }
 if ($newHashes.Count -ne $archiveFiles) { throw 'Extracted file count differs from the archive; inspect package before installation' }
 $movedOld = $false
 try {
