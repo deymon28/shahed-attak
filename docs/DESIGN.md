@@ -31,6 +31,7 @@ README.md is the player guide. This document maps the runtime code and records t
 - **Determinism.** All randomness uses the per-surface generators in storage (`rng_state` for planning, `combat_rng_state` for hits). Iteration that affects outcomes is ordered (sorted projectile and pending-event ids).
 - **Fire doctrine.** `surface_state.engagements[key]` counts interceptors in flight per target (`m<missile id>` or `d<drone unit>`). A shot releases its count when it hits, misses, self-destructs or is removed. `ordnance.recount` rebuilds the table after a configuration change.
 - **Magazines.** `launcher_rounds[unit] = {rounds, reload_tick}`; one canister returns every `ABM_RELOAD_TICKS`. Interceptor items are consumed only on launch.
+- **Derived caches are not authoritative.** `defense.lua` caches positions of fixed batteries and radars in a module-local table; each missile stores the launchers that can reach it (`missile.launchers`, refreshed every 30 ticks with its radar coverage). Both are rebuilt identically on every peer, so they never cause desyncs; anything that moves batteries or radars by script must not rely on them.
 - **Ballistic classes** are fixed per missile at launch (`missile.class`); missiles from older saves are treated as heavy.
 - **Ground turrets ignore aircraft.** `prototypes/ground_defense.lua` applies to every ammo, electric and fluid turret not created by this mod, and gives turret-fired ammunition ground-only damage types to which drones are immune.
 

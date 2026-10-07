@@ -16,9 +16,15 @@ local visual_effects = require("scripts.visual_effects")
 local ballistics = {}
 
 local MARKER_COLOR = {r = 1, g = 0.15, b = 0.05, a = 0.9}
+-- How far beyond launcher range a missile may travel between candidate
+-- refreshes (twice a second); terminal speed stays well below this.
+local LAUNCHER_MARGIN = 64
+local REFRESH_TICKS = 30
 
 local function create_marker(missile, radius)
   if missile.marker and missile.marker.valid then
+    if missile.marker_radius == radius then return end
+    missile.marker_radius = radius
     missile.marker.radius = radius
     if missile.chart_marker and missile.chart_marker.valid then missile.chart_marker.radius = radius end
     return
@@ -195,10 +201,8 @@ local function finish_missile(missile, surface_state, reason, generator)
   return false
 end
 
-local function update_missile(missile, surface_state, tick, generator)
-  local surface = game.get_surface(missile.surface_index)
-  local force = game.forces[missile.force_index]
-  if not surface or not force then
+local function update_missile(missile, surface_state, tick, generator, surface)
+  if not surface or not game.forces[missile.force_index] then
     return finish_missile(missile, surface_state, "invalid", generator)
   end
   if missile.intercepted then
@@ -221,8 +225,10 @@ local function update_missile(missile, surface_state, tick, generator)
   end
   local visible = not missile.visual_handoff_tick or tick >= missile.visual_handoff_tick
   local base_scale = rules.class_stats(missile.class).scale
+  local reveal = visible and not missile.shown
+  if reveal then missile.shown = true end
   if missile.render and missile.render.valid then
-    missile.render.visible = visible
+    if reveal then missile.render.visible = true end
     missile.render.target = missile.visual_position
     local scale = base_scale + math.sin(progress * math.pi) * 0.15
     missile.render.x_scale = scale
@@ -230,20 +236,25 @@ local function update_missile(missile, surface_state, tick, generator)
   end
   if missile.light and missile.light.valid then
     missile.light.target = missile.visual_position
-    missile.light.scale = progress >= 0.75 and 2.2 or 1.4
+    if progress >= 0.75 and not missile.terminal_light then
+      missile.terminal_light = true
+      missile.light.scale = 2.2
+    end
   end
   if missile.shadow and missile.shadow.valid then
     missile.shadow.target = missile.position
-    missile.shadow.visible = visible
+    if reveal then missile.shadow.visible = true end
   end
   if tick % 8 == 0 then
     surface.create_trivial_smoke({name = "smoke-fast", position = missile.visual_position})
     missile.trail_emissions = missile.trail_emissions + 1
   end
 
-  -- Radar coverage changes slowly; re-evaluate it twice a second.
-  if not missile.tracking_tick or tick - missile.tracking_tick >= 30 then
+  -- Radar coverage and the launchers able to engage change slowly;
+  -- re-evaluate them twice a second.
+  if not missile.tracking_tick or tick - missile.tracking_tick >= REFRESH_TICKS then
     missile.tracking = defense.tracking_for_position(surface_state, missile.force_index, missile.position, "ballistic")
+    missile.launchers = defense.nearby_launchers(surface_state, missile.force_index, missile.position, LAUNCHER_MARGIN)
     missile.tracking_tick = tick
   end
   local tracking = missile.tracking
@@ -257,13 +268,15 @@ local function update_missile(missile, surface_state, tick, generator)
     missile.warning_seconds = missile.eta_seconds
     surface_state.warning_history[missile.id] = {kind = "ballistic", tick = tick,
       eta = missile.eta_seconds, direction = direction, position = missile.position, target = missile.target_position}
-    alerts.ballistic(force, missile.target_entity, math.ceil(missile.eta_seconds),
+    alerts.ballistic(game.forces[missile.force_index], missile.target_entity, math.ceil(missile.eta_seconds),
       missile.target_position, missile.id, {"shahed-attack-direction." .. direction})
     radar_signals.record_detection(surface, missile.force_index, missile.position, "ballistic", tick)
   end
   if missile.detected then create_marker(missile, math.max(8, 24 - 16 * tracking)) end
   -- Launchers have their own short-range trackers; the radar gives early warning.
-  defense.try_intercepts(missile, surface_state)
+  if #missile.launchers > 0 then
+    defense.try_intercepts(missile, surface_state, missile.launchers)
+  end
 
   if progress >= 1 then
     return finish_missile(missile, surface_state, "impact", generator)
@@ -275,8 +288,10 @@ function ballistics.update(tick)
   for _, surface_state in pairs(storage.shahed_attack.surfaces) do
     if next(surface_state.active_missiles) then
       local generator = random.new(surface_state.rng_state)
+      local surface
       for missile_id, missile in pairs(surface_state.active_missiles) do
-        if not update_missile(missile, surface_state, tick, generator) then
+        surface = surface or game.get_surface(missile.surface_index)
+        if not update_missile(missile, surface_state, tick, generator, surface) then
           surface_state.active_missiles[missile_id] = nil
         end
       end

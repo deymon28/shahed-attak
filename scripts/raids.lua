@@ -462,18 +462,18 @@ local function finish_recon(surface_state, record)
   command_drone(record)
 end
 
-local function maybe_alert(surface_state, record, distance_to_target)
+local function maybe_alert(surface_state, record, distance_to_target, position)
   if surface_state.alerted_events[record.event_id] then
     return
   end
-  local tracking = defense.tracking_for_position(surface_state, record.target_force_index, record.entity.position)
+  local tracking = defense.tracking_for_position(surface_state, record.target_force_index, position)
   if rules.drone_warning(distance_to_target, record.entity.speed, tracking > 0) then
     surface_state.alerted_events[record.event_id] = true
     local eta = rules.drone_eta(distance_to_target, record.entity.speed)
-    local direction = rules.incoming_direction(record.entity.position, record.target_position)
+    local direction = rules.incoming_direction(position, record.target_position)
     surface_state.warning_history[record.event_id] = {kind = "air-raid", tick = game.tick,
-      eta = eta, direction = direction, position = record.entity.position, target = record.target_position}
-    radar_signals.record_detection(record.entity.surface, record.target_force_index, record.entity.position, "air", game.tick)
+      eta = eta, direction = direction, position = position, target = record.target_position}
+    radar_signals.record_detection(record.entity.surface, record.target_force_index, position, "air", game.tick)
     local force = game.forces[record.target_force_index]
     if force then
       alerts.air_raid(force,
@@ -512,7 +512,8 @@ local function update_record(surface_state, record, tick, generator)
     return false
   end
 
-  local current_position = {x = record.entity.position.x, y = record.entity.position.y}
+  local position = record.entity.position
+  local current_position = {x = position.x, y = position.y}
   record.last_motion = flight_math.normalized_motion(record.last_position or current_position,
     current_position, record.entity.orientation)
   record.last_position = current_position
@@ -524,7 +525,7 @@ local function update_record(surface_state, record, tick, generator)
   end
 
   if record.mission == "returning" then
-    if defense_math.distance(record.entity.position, record.origin) <= 5 then
+    if defense_math.distance(position, record.origin) <= 5 then
       record.entity.destroy()
       return false
     end
@@ -536,22 +537,22 @@ local function update_record(surface_state, record, tick, generator)
   end
 
   if record.mission == "approach" and record.via
-    and defense_math.distance(record.entity.position, record.via) <= 8 then
+    and defense_math.distance(position, record.via) <= 8 then
     record.via = nil
     command_drone(record)
   end
   if record.mission == "approach" and not record.via and record.approach_destination
-    and defense_math.distance(record.entity.position, record.approach_destination) <= 3 then
+    and defense_math.distance(position, record.approach_destination) <= 3 then
     record.approach_destination = nil
     command_drone(record)
   end
 
-  local distance_to_target = defense_math.distance(record.entity.position, record.target_position)
+  local distance_to_target = defense_math.distance(position, record.target_position)
   if record.kind ~= "recon" and record.target_entity and record.target_entity.valid then
-    track_moving_target(record, defense_math.distance(record.entity.position, record.target_entity.position))
-    distance_to_target = defense_math.distance(record.entity.position, record.target_position)
+    track_moving_target(record, defense_math.distance(position, record.target_entity.position))
+    distance_to_target = defense_math.distance(position, record.target_position)
   end
-  maybe_alert(surface_state, record, distance_to_target)
+  maybe_alert(surface_state, record, distance_to_target, position)
 
   if record.kind == "recon" then
     if record.mission == "approach" and distance_to_target <= 18 then
@@ -562,7 +563,7 @@ local function update_record(surface_state, record, tick, generator)
     elseif record.mission == "scanning" then
       record.scan_progress = record.scan_progress + 60
       if not record.orbit_destination
-        or defense_math.distance(record.entity.position, record.orbit_destination) <= 4 then
+        or defense_math.distance(position, record.orbit_destination) <= 4 then
         next_orbit_destination(record)
       end
       if record.scan_progress >= record.scan_required then

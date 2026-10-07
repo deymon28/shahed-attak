@@ -47,6 +47,23 @@ function defense.launcher_range(entity)
   return entity.name == ABM_WAGON and rules.ABM_WAGON_RANGE or rules.ABM_RANGE
 end
 
+-- Fixed batteries and radars never move, so their position is read from
+-- the engine once; rail launchers report their live position. The cache is
+-- derived state only (rebuilt identically on every peer after loading).
+local position_cache = {}
+local function launcher_position(launcher)
+  if is_wagon(launcher) then
+    return launcher.position
+  end
+  local cached = position_cache[launcher.unit_number]
+  if not cached then
+    cached = launcher.position
+    position_cache[launcher.unit_number] = cached
+  end
+  return cached
+end
+defense.launcher_position = launcher_position
+
 local function launcher_inventory(entity)
   if is_wagon(entity) then
     return entity.get_inventory(defines.inventory.cargo_wagon)
@@ -203,6 +220,7 @@ function defense.on_object_destroyed(event)
   local surface_state = state.get_surface(record.surface_index)
   if surface_state then
     local unit = record.unit_number
+    position_cache[unit] = nil
     surface_state.defenses[record.defense_type][unit] = nil
     surface_state.battery_modes[unit] = nil
     surface_state.battery_tracking[unit] = nil
@@ -223,7 +241,7 @@ function defense.tracking_for_position(surface_state, force_index, position, thr
   local best = 0
   for _, radar in pairs(surface_state.defenses.radars) do
     if radar.valid and radar.force.index == force_index and powered(radar, 1000) then
-      local distance = defense_math.distance(radar.position, position)
+      local distance = defense_math.distance(launcher_position(radar), position)
       if distance <= range then
         best = math.max(best, math.max(0.01, 1 - distance / range))
       end
@@ -310,7 +328,7 @@ local function aim_at(surface_state, launcher, target)
       local missile = surface_state.active_missiles[lock.missile_id]
       previous = missile and not missile.intercepted and not missile.finished and missile or nil
     end
-    if previous and defense_math.distance(launcher.position, previous.position) <= defense.launcher_range(launcher) then
+    if previous and defense_math.distance(launcher_position(launcher), previous.position) <= defense.launcher_range(launcher) then
       return false
     end
     lock = nil
@@ -320,7 +338,7 @@ local function aim_at(surface_state, launcher, target)
       acquired_tick = game.tick, updated_tick = game.tick}
     tracking[launcher.unit_number] = lock
   end
-  local desired = flight_math.orientation(launcher.position, target.position)
+  local desired = flight_math.orientation(launcher_position(launcher), target.position)
   local heading = get_heading(surface_state, launcher)
   local difference = (desired - heading + 0.5) % 1 - 0.5
   local step = rules.ABM_TURN_RATE * math.max(0, game.tick - lock.updated_tick)
@@ -338,7 +356,7 @@ end
 
 local function try_intercept(launcher, target, surface_state)
   local tick = game.tick
-  local distance = defense_math.distance(launcher.position, target.position)
+  local distance = defense_math.distance(launcher_position(launcher), target.position)
   if distance > defense.launcher_range(launcher) then
     release_lock(surface_state, launcher, target)
     return
@@ -381,12 +399,28 @@ local function abm_launchers(surface_state)
   return {surface_state.defenses.abm_batteries, surface_state.defenses.abm_wagons}
 end
 
-function defense.try_intercepts(missile, surface_state)
+-- Launchers of a force that may reach a position soon (range plus margin).
+function defense.nearby_launchers(surface_state, force_index, position, margin)
+  local result = {}
+  for _, list in ipairs(abm_launchers(surface_state)) do
+    for _, launcher in pairs(list) do
+      if launcher.valid and launcher.force.index == force_index
+        and defense_math.distance(launcher_position(launcher), position) <= defense.launcher_range(launcher) + margin then
+        result[#result + 1] = launcher
+      end
+    end
+  end
+  return result
+end
+
+-- launchers: optional pre-filtered candidates (see nearby_launchers).
+function defense.try_intercepts(missile, surface_state, launchers)
   if missile.intercepted or missile.finished then
     return true
   end
   local target = {id = missile.id, position = missile.position, class = missile.class}
-  for _, list in ipairs(abm_launchers(surface_state)) do
+  local lists = launchers and {launchers} or abm_launchers(surface_state)
+  for _, list in ipairs(lists) do
     for _, launcher in pairs(list) do
       if launcher.valid and launcher.force.index == missile.force_index
         and defense.get_mode(launcher) ~= "drones" then
@@ -401,7 +435,7 @@ local function ballistic_in_range(launcher, surface_state)
   local range = defense.launcher_range(launcher)
   for _, missile in pairs(surface_state.active_missiles) do
     if not missile.intercepted and not missile.finished and missile.force_index == launcher.force.index
-      and defense_math.distance(launcher.position, missile.position) <= range then
+      and defense_math.distance(launcher_position(launcher), missile.position) <= range then
       return true
     end
   end
@@ -419,7 +453,7 @@ local function eligible_drone(launcher, record, range)
   local entity = record and record.entity
   return record ~= nil and DRONE_TARGET_KINDS[record.kind] and entity ~= nil and entity.valid
     and record.target_force_index == launcher.force.index and hostile(launcher.force, entity)
-    and defense_math.distance(launcher.position, entity.position) <= range
+    and defense_math.distance(launcher_position(launcher), entity.position) <= range
 end
 
 local function choose_drone(surface_state, launcher, limit)
@@ -439,7 +473,7 @@ local function choose_drone(surface_state, launcher, limit)
   for id, candidate in pairs(surface_state.active_drones) do
     if eligible_drone(launcher, candidate, range)
       and ordnance.engaged(surface_state, "d" .. id) < limit then
-      local distance = defense_math.distance(launcher.position, candidate.entity.position)
+      local distance = defense_math.distance(launcher_position(launcher), candidate.entity.position)
       if not nearest or distance < nearest_distance or (distance == nearest_distance and id < nearest_id) then
         nearest, nearest_distance, nearest_id = candidate.entity, distance, id
       end

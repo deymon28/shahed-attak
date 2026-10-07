@@ -98,38 +98,51 @@ local function squared_distance(a, b)
   return dx * dx + dy * dy
 end
 
-local function live_counts(record)
+-- Threats that a radar would report, read from the engine once per update
+-- and shared by every radar on the surface.
+local function snapshot(surface_index)
+  local surface_state = state.get_surface(surface_index)
+  local result = {drones = {}, missiles = {}}
+  if not surface_state then
+    return result
+  end
+  for _, drone in pairs(surface_state.active_drones) do
+    local entity = drone.entity
+    if entity and entity.valid and drone.mission ~= "returning" then
+      local position = entity.position
+      if rules.drone_warning(math.sqrt(squared_distance(position, drone.target_position)), entity.speed, true) then
+        result.drones[#result.drones + 1] = {force_index = drone.target_force_index, position = position}
+      end
+    end
+  end
+  for _, missile in pairs(surface_state.active_missiles) do
+    if not missile.intercepted
+      and (missile.duration - (game.tick - missile.start_tick)) / 60 <= rules.WARNING_HORIZON then
+      result.missiles[#result.missiles + 1] = {force_index = missile.force_index, position = missile.position}
+    end
+  end
+  return result
+end
+
+local BALLISTIC_RADIUS_SQUARED = rules.BALLISTIC_RADAR_RANGE ^ 2
+
+local function live_counts(record, threats)
   local radar = record.radar
   if radar.energy < 1000 then
     return 0, 0
   end
-  local surface_state = state.get_surface(radar.surface.index)
-  if not surface_state then
-    return 0, 0
-  end
-
+  local force_index = radar.force.index
+  local position = record.position or radar.position
+  record.position = position
   local air_count = 0
-  for _, drone in pairs(surface_state.active_drones or {}) do
-    if drone.entity
-      and drone.entity.valid
-      and drone.entity.surface.index == radar.surface.index
-      and drone.target_force_index == radar.force.index
-      and drone.mission ~= "returning"
-      and rules.drone_warning(math.sqrt(squared_distance(drone.entity.position,drone.target_position)),drone.entity.speed,true)
-      and squared_distance(drone.entity.position, radar.position) <= DETECTION_RADIUS_SQUARED
-    then
+  for _, drone in ipairs(threats.drones) do
+    if drone.force_index == force_index and squared_distance(drone.position, position) <= DETECTION_RADIUS_SQUARED then
       air_count = air_count + 1
     end
   end
-
   local ballistic_count = 0
-  for _, missile in pairs(surface_state.active_missiles or {}) do
-    if missile.surface_index == radar.surface.index
-      and missile.force_index == radar.force.index
-      and not missile.intercepted
-      and (missile.duration-(game.tick-missile.start_tick))/60 <= rules.WARNING_HORIZON
-      and squared_distance(missile.position, radar.position) <= rules.BALLISTIC_RADAR_RANGE ^ 2
-    then
+  for _, missile in ipairs(threats.missiles) do
+    if missile.force_index == force_index and squared_distance(missile.position, position) <= BALLISTIC_RADIUS_SQUARED then
       ballistic_count = ballistic_count + 1
     end
   end
@@ -146,7 +159,14 @@ local function latched_count(live_count, previous_count, previous_until, tick)
   return 0, 0
 end
 
-local function set_outputs(relay, air_count, ballistic_count, enabled)
+local function set_outputs(record, air_count, ballistic_count, enabled)
+  -- Combinator writes are skipped while the published values are unchanged.
+  if record.output_air == air_count and record.output_ballistic == ballistic_count
+    and record.output_enabled == enabled then
+    return
+  end
+  record.output_air, record.output_ballistic, record.output_enabled = air_count, ballistic_count, enabled
+  local relay = record.relay
   local behavior = relay.get_or_create_control_behavior()
   local section = behavior.get_section(1) or behavior.add_section("shahed-attack")
   section.set_slot(1, {
@@ -161,8 +181,9 @@ local function set_outputs(relay, air_count, ballistic_count, enabled)
   behavior.enabled = enabled
 end
 
-local function update_record(record, tick)
-  local live_air, live_ballistic = live_counts(record)
+local function update_record(record, tick, threats)
+  threats = threats or snapshot(record.radar.surface.index)
+  local live_air, live_ballistic = live_counts(record, threats)
   local live_alerting = live_air > 0 or live_ballistic > 0
   if live_alerting and not record.live_alerting then
     audio.play(
@@ -189,9 +210,9 @@ local function update_record(record, tick)
   record.alerting = record.air_count > 0 or record.ballistic_count > 0
   visual_effects.set_radar_alert(record.radar, record.alerting)
   if circuit_delivery_enabled() then
-    set_outputs(record.relay, record.air_count, record.ballistic_count, true)
+    set_outputs(record, record.air_count, record.ballistic_count, true)
   else
-    set_outputs(record.relay, 0, 0, false)
+    set_outputs(record, 0, 0, false)
   end
 end
 
@@ -261,13 +282,16 @@ end
 
 function radar_signals.update(tick)
   local root = ensure_root()
+  local threats = {}
   for unit_number, record in pairs(root.radar_relays) do
     if not record.radar or not record.radar.valid or not record.relay or not record.relay.valid then
       discard_record(root, unit_number, true)
     else
       -- Wires are made when the relay is created; the hidden relay cannot be
       -- edited by players, so they are not re-checked every second.
-      update_record(record, tick)
+      local surface_index = record.radar.surface.index
+      threats[surface_index] = threats[surface_index] or snapshot(surface_index)
+      update_record(record, tick, threats[surface_index])
     end
   end
 end

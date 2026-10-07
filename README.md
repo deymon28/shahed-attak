@@ -6,13 +6,12 @@ A Factorio 2.0.77+ mod that adds an aerial enemy faction to Nauvis: reconnaissan
 
 The enemy develops with biter evolution, the same way for drones and missiles:
 
-| Evolution | Drone raids | Ballistic missiles |
+| Evolution | Drone raids (default settings) | Ballistic missiles (default settings) |
 | --- | --- | --- |
-| Start | Small groups of 2-4 strike drones after a 2-day grace period | None |
-| ~0.25 (and day 12, 30 min after chemical science) | Larger groups | Single **light** missiles: weak warhead, up to 10 tiles off target |
-| ~0.3-0.5 | Decoys appear, raids grow to 10+ aircraft | **Medium** missiles, salvos of 2-4 |
-| ~0.5-0.7 | Some aircraft attack AA guns, radars and ABM launchers near the target | Salvos, some combined with drone raids so both arrive together |
-| ~0.7-1.0 | Mass raids of 20-40 aircraft in several groups from different directions, sized against your known defenses | **Heavy** missiles: accurate, faster, harder to intercept, salvos up to 8 |
+| 0-0.25 | 2-5 strike drones every ~10 min, after a 2-day grace period | None |
+| 0.25-0.5 (and day 12, 30 min after chemical science) | 5-10 aircraft; decoys from 0.3 | **Light** missiles: weak warhead, up to 10 tiles off target; 1-3 per salvo every ~16-21 min |
+| 0.5-0.75 | 10-16 aircraft in groups of eight; some attack AA guns, radars and missile-defense launchers | **Medium** missiles, 3-5 per salvo every ~10-15 min; some salvos are timed to arrive with a drone raid |
+| 0.75-1.0 | 16-24 aircraft, plus extra aircraft for every known defense near the target (up to 40) | **Heavy** missiles: accurate, faster, harder to intercept; 4-8 per salvo every ~6-10 min |
 
 - Every attack starts at a real enemy base. Airfields appear near biter nests at least 384 tiles from the map center; ballistic launch sites at least 640 tiles away. Destroying all bases of a type stops attacks of that type; aircraft already in the air continue.
 - Mass raids are split into groups of up to eight. Groups take off 15-45 seconds apart and swing out to approach from different bearings.

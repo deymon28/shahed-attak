@@ -103,33 +103,41 @@ script.on_event(defines.events.on_surface_deleted, function(event)
   state.forget_surface(event.surface_index)
 end)
 
-script.on_event(defines.events.on_tick, wrap("on_tick", function(event)
+-- Each subsystem is timed separately when profiling is active.
+local tick_handlers = {
+  wrap("tick.ballistics", ballistics.update),
+  wrap("tick.drone_intercepts", defense.update_drone_intercepts),
+  wrap("tick.ordnance", ordnance.update),
+  wrap("tick.alert_sounds", alerts.flush_sounds),
+  wrap("tick.visuals", visual_effects.update)
+}
+script.on_event(defines.events.on_tick, function(event)
   local tick = event.tick
-  ballistics.update(tick)
-  defense.update_drone_intercepts(tick)
-  ordnance.update(tick)
-  alerts.flush_sounds(tick)
-  visual_effects.update(tick)
-end))
+  for _, handler in ipairs(tick_handlers) do handler(tick) end
+end)
 
-script.on_nth_tick(60, wrap("nth_60", function(event)
-  local tick = event.tick
-  battery_gui.update()
-  raids.update(tick)
-  director.process_pending(tick)
-  defense.update(tick)
-  radar_signals.update(tick)
-  infrastructure.update()
-  targeting.update()
-  stats_gui.update()
-end))
+local second_handlers = {
+  wrap("second.battery_gui", function() battery_gui.update() end),
+  wrap("second.raids", raids.update),
+  wrap("second.pending", director.process_pending),
+  wrap("second.defense", defense.update),
+  wrap("second.radar_signals", radar_signals.update),
+  wrap("second.infrastructure", function() infrastructure.update() end),
+  wrap("second.targeting", function() targeting.update() end),
+  wrap("second.stats_gui", function() stats_gui.update() end)
+}
+script.on_nth_tick(60, function(event)
+  for _, handler in ipairs(second_handlers) do handler(event.tick) end
+end)
 
-script.on_nth_tick(600, wrap("nth_600", function(event)
-  local tick = event.tick
-  state.prune(tick)
-  director.update(tick)
-  alerts.update(tick)
-  audio.update(tick)
-end))
+local slow_handlers = {
+  wrap("slow.prune", state.prune),
+  wrap("slow.director", director.update),
+  wrap("slow.alerts", alerts.update),
+  wrap("slow.audio", audio.update)
+}
+script.on_nth_tick(600, function(event)
+  for _, handler in ipairs(slow_handlers) do handler(event.tick) end
+end)
 
 commands_api.register()

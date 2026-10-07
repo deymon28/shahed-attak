@@ -26,7 +26,7 @@ foreach ($path in @($backupRoot, $stageRoot, $backupInstallation, $stageInstalla
 function Get-TreeHashes([string]$Root) {
     $hashes = @{}
     Get-ChildItem -LiteralPath $Root -Recurse -File | ForEach-Object {
-        $relative = [IO.Path]::GetRelativePath($Root, $_.FullName).Replace('\', '/')
+        $relative = $_.FullName.Substring($Root.TrimEnd('\', '/').Length + 1).Replace('\', '/')
         $hashes[$relative] = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
     }
     return $hashes
@@ -48,7 +48,10 @@ foreach ($name in @('mod-list.json', 'mod-settings.dat')) {
 }
 Expand-Archive -LiteralPath $archive -DestinationPath $stageRoot
 $newHashes = Get-TreeHashes $stageInstallation
-if ($newHashes.Count -ne 142) { throw 'Unexpected runtime file count; inspect package before installation' }
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$zip = [IO.Compression.ZipFile]::OpenRead($archive)
+try { $archiveFiles = @($zip.Entries | Where-Object { -not $_.FullName.EndsWith('/') }).Count } finally { $zip.Dispose() }
+if ($newHashes.Count -ne $archiveFiles) { throw 'Extracted file count differs from the archive; inspect package before installation' }
 $movedOld = $false
 try {
     # Absolute source/destination paths have been validated above.
@@ -74,7 +77,7 @@ $report = @{
     backup_files = $oldHashes; installed_files = $newHashes; unchanged_settings = $settingHashes
 }
 $report | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $backupRoot 'backup-manifest.json') -Encoding utf8
-$report | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $projectRoot 'build/hybrid-overhaul/installation.json') -Encoding utf8
+$report | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $projectRoot 'build/installation.json') -Encoding utf8
 Write-Output "Installed $($metadata.version): $installedRoot"
 Write-Output "Verified backup of $oldVersion`: $backupRoot"
 Write-Output "Verified $($newHashes.Count) runtime files; mod list and settings are byte-identical."

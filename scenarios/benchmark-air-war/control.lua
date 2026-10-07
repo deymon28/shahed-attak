@@ -3,9 +3,10 @@
 -- can be measured on the same world: raids start at airfields placed at
 -- the requested origin positions, missiles at a placed launch site.
 local surface
-local targets = {}
-local batteries = {}
-local radars = {}
+-- State lives in storage: the benchmark replays a saved game.
+local targets, batteries, radars
+
+
 local ORIGINS = {{x = -560, y = 0}, {x = 560, y = 0}, {x = 0, y = -560}, {x = 0, y = 560}}
 local SAVE_TICK = 900
 
@@ -15,6 +16,8 @@ end
 
 script.on_init(function()
   surface = game.surfaces[1]
+  storage.targets, storage.batteries, storage.radars = {}, {}, {}
+  targets, batteries, radars = storage.targets, storage.batteries, storage.radars
   surface.always_day = true
   surface.peaceful_mode = true
   surface.request_to_generate_chunks({0, 0}, 20)
@@ -52,6 +55,7 @@ script.on_init(function()
 end)
 
 local function attack(tick)
+  targets = storage.targets
   if tick % 300 == 30 then
     for index, origin in ipairs(ORIGINS) do
       local target = targets[(tick / 30 + index * 37) % #targets + 1]
@@ -71,6 +75,7 @@ local function attack(tick)
 end
 
 script.on_event(defines.events.on_tick, function(event)
+  batteries, radars = storage.batteries, storage.radars
   for _, battery in ipairs(batteries) do
     if battery.valid then
       battery.energy = 20000000

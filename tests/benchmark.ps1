@@ -48,8 +48,13 @@ write-data=$writeData
 locale=en
 "@ | Set-Content -LiteralPath $configPath -Encoding UTF8
 $serverSettings = Join-Path $benchRoot "server-settings.json"
-@{ name = "benchmark"; visibility = @{ public = $false; lan = $false }; require_user_verification = $false;
-   auto_pause = $false; autosave_interval = 0 } | ConvertTo-Json | Set-Content -LiteralPath $serverSettings -Encoding UTF8
+@{
+    name = "Shahed Attack Benchmark"; description = "Local benchmark"; max_players = 0
+    visibility = @{ public = $false; lan = $false }
+    username = ""; password = ""; token = ""; game_password = ""
+    require_user_verification = $false; allow_commands = "true"
+    auto_pause = $false; auto_pause_when_players_connect = $false; autosave_interval = 0
+} | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $serverSettings -Encoding UTF8
 
 # 1. Build the mid-battle save.
 $arguments = @("--config", $configPath, "--mod-directory", $modsRoot, "--start-server-load-scenario",
