@@ -1,5 +1,6 @@
 local flight_math = require("scripts.lib.flight_math")
 local abm_launch = require("scripts.lib.abm_launch")
+local state = require("scripts.state")
 
 local visual_effects = {}
 
@@ -9,14 +10,7 @@ local OWNER_ANIMATIONS = {
 }
 
 local function root()
-  storage.shahed_attack.visual_records = storage.shahed_attack.visual_records or {}
-  storage.shahed_attack.visual_registrations = storage.shahed_attack.visual_registrations or {}
-  storage.shahed_attack.visual_active_launches = storage.shahed_attack.visual_active_launches or {}
-  storage.shahed_attack.visual_counters = storage.shahed_attack.visual_counters or {
-    ballistic_launches = 0,
-    abm_launches = 0
-  }
-  return storage.shahed_attack
+  return state.root()
 end
 
 local function destroy_render(render)
@@ -91,7 +85,7 @@ function visual_effects.initialize()
     end
   end
   for _, surface in pairs(game.surfaces) do
-    for entity_name in pairs(OWNER_ANIMATIONS) do
+    for entity_name in pairs(state.supported(surface) and OWNER_ANIMATIONS or {}) do
       for _, entity in ipairs(surface.find_entities_filtered({name = entity_name})) do
         ensure_idle(entity)
       end

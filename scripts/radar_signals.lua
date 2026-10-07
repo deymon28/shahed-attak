@@ -1,5 +1,6 @@
 local alert_policy = require("scripts.lib.alert_policy")
 local audio = require("scripts.audio")
+local config = require("scripts.lib.config")
 local state = require("scripts.state")
 local visual_effects = require("scripts.visual_effects")
 
@@ -12,16 +13,11 @@ local DETECTION_RADIUS_SQUARED = rules.DRONE_RADAR_RANGE ^ 2
 local LATCH_TICKS = 600
 
 local function ensure_root()
-  storage.shahed_attack = storage.shahed_attack or {}
-  local root = storage.shahed_attack
-  root.radar_relays = root.radar_relays or {}
-  root.radar_relay_registrations = root.radar_relay_registrations or {}
-  return root
+  return state.root()
 end
 
 local function circuit_delivery_enabled()
-  local entry = settings.global["shahed-attack-alert-delivery"]
-  return alert_policy.publishes_circuit(entry and entry.value or "both")
+  return alert_policy.publishes_circuit(config.global("shahed-attack-alert-delivery"))
 end
 
 local function connect_color(radar, relay, connector_id)
@@ -52,7 +48,8 @@ local function discard_record(root, unit_number, destroy_relay)
 end
 
 local function ensure_relay(radar)
-  if not radar or not radar.valid or radar.name ~= RADAR_NAME or not radar.unit_number then
+  if not radar or not radar.valid or radar.name ~= RADAR_NAME or not radar.unit_number
+    or not state.supported(radar.surface) then
     return nil
   end
   local root = ensure_root()
@@ -268,7 +265,8 @@ function radar_signals.update(tick)
     if not record.radar or not record.radar.valid or not record.relay or not record.relay.valid then
       discard_record(root, unit_number, true)
     else
-      connect_relay(record)
+      -- Wires are made when the relay is created; the hidden relay cannot be
+      -- edited by players, so they are not re-checked every second.
       update_record(record, tick)
     end
   end

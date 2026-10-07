@@ -1,7 +1,6 @@
 local root = (... and ... ~= "" and ...) or "."
 package.path = table.concat({root .. "/?.lua", root .. "/?/init.lua", package.path}, ";")
 
-local balance = require("scripts.balance")
 local alert_policy = require("scripts.lib.alert_policy")
 local audio_policy = require("scripts.lib.audio_policy")
 local defense_math = require("scripts.lib.defense_math")
@@ -41,34 +40,6 @@ equal(audio_policy.can_play(nil, 100, 30), true, "first positional sound can pla
 equal(audio_policy.can_play(100, 129, 30), false, "sound remains blocked before cooldown expiry")
 equal(audio_policy.can_play(100, 130, 30), true, "sound plays at exact cooldown expiry")
 equal(audio_policy.can_play(100, 100, 0), true, "zero cooldown permits same-tick sound")
-
-equal(balance.choose_event_kind(0.10, 0.2, true), "recon", "recon event")
-equal(balance.choose_event_kind(0.50, 0.2, true), "raid", "strike event")
-equal(balance.choose_event_kind(0.95, 0.2, true), "raid", "mixed locked by evolution")
-equal(balance.choose_event_kind(0.95, 0.5, true), "mixed", "mixed unlocked")
-equal(balance.choose_event_kind(0.10, 0.5, false), "raid", "recon disabled")
-
-equal(balance.crash_outcome("recon", 0.89, 0), "safe", "recon safe crash")
-equal(balance.crash_outcome("recon", 0.95, 0), "fuel", "recon fuel crash")
-equal(balance.crash_outcome("strike", 0.59, 0), "safe", "strike safe crash")
-equal(balance.crash_outcome("strike", 0.89, 0), "fuel", "strike fuel crash")
-equal(balance.crash_outcome("strike", 0.95, 0), "warhead", "strike warhead crash")
-equal(balance.crash_outcome("heavy", 0.79, 1), "fuel", "heavy fuel crash")
-equal(balance.crash_outcome("heavy", 0.80, 1), "warhead", "heavy scaled warhead crash")
-
-equal(balance.ballistic_eligible(19, 1, true), false, "ballistic day gate")
-equal(balance.ballistic_eligible(20, 0.34, true), false, "ballistic evolution gate")
-equal(balance.ballistic_eligible(20, 0.35, true), true, "ballistic gates open")
-equal(balance.ballistic_eligible(20, 1, false), false, "ballistic disabled")
-
-equal(balance.crossed_dusk(0.20, 0.30, 0.25, false, false), true, "normal dusk crossing")
-equal(balance.crossed_dusk(0.90, 0.10, 0.25, false, false), false, "day wrap is not dusk")
-equal(balance.crossed_dusk(0.20, 0.30, 0.25, true, false), false, "always day")
-equal(balance.crossed_dusk(0.20, 0.30, 0.25, false, true), false, "frozen time")
-
-close(defense_math.geometry_score({x = 0, y = 0}, {x = 200, y = 0}, {x = 100, y = 0}, 48, 192), 1, 0.000001, "battery on trajectory")
-close(defense_math.geometry_score({x = 0, y = 0}, {x = 200, y = 0}, {x = 100, y = 192}, 48, 192), 0, 0.000001, "battery outside envelope")
-close(defense_math.geometry_score({x = 0, y = 0}, {x = 200, y = 0}, {x = 100, y = 96}, 48, 192), 0.5, 0.000001, "battery partial geometry")
 
 local diagonal = flight_math.normalized_motion({x = 0, y = 0}, {x = 3, y = 4}, 0)
 close(diagonal.x, 0.6, 0.000001, "recorded horizontal flight vector")

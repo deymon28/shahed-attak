@@ -34,6 +34,7 @@ local function migrate_entities(air_force)
     "shahed-attack-recon-drone",
     "shahed-attack-strike-drone",
     "shahed-attack-heavy-drone",
+    "shahed-attack-decoy-drone",
     "shahed-attack-airfield",
     "shahed-attack-ballistic-site"
   }

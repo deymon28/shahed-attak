@@ -1,48 +1,105 @@
-package.path='./?.lua;'..package.path
-local launches=0
-package.loaded['scripts.ordnance']={launch_interceptor=function() launches=launches+1 end}
-package.loaded['scripts.alerts']={}
-package.loaded['scripts.audio']={play=function() end}
-package.loaded['scripts.visual_effects']={play_abm_launch=function() end}
-defines={inventory={turret_ammo=1},entity_status_diode={green=1,yellow=2,red=3}}
-settings={global={}}
-game={tick=0}
-local defense=require('scripts.defense')
-local surface={defenses={abm_batteries={}},battery_next_shot={},counters={},active_missiles={}}
-for i=1,5 do
- local inventory={count=10}
- inventory.get_item_count=function() return inventory.count end
- inventory.remove=function() inventory.count=inventory.count-1;return 1 end
- surface.defenses.abm_batteries[i]={valid=true,unit_number=i,position={x=0,y=0},orientation=0,
-  force={index=1},energy=40000000,get_inventory=function() return inventory end}
+-- ABM fire control: smooth acquisition, fire doctrine, magazines, range and costs.
+local h = require("tests.lib.harness")
+h.reset()
+local current = h.surface_state()
+local defense = require("scripts.defense")
+local ordnance = require("scripts.ordnance")
+local rules = require("scripts.lib.air_rules")
+
+local batteries = {}
+for i = 1, 5 do
+  local battery = h.entity({name = "shahed-attack-abm-battery", position = {x = 0, y = 0},
+    energy = 100000000, inventory = h.inventory({["shahed-attack-interceptor"] = 10})})
+  defense.on_entity_created(battery)
+  batteries[i] = battery
 end
-local missile={id=1,force_index=1,position={x=100,y=0},probabilities={}}
-surface.active_missiles[1]=missile
-assert(not defense.try_intercepts(missile,surface))
-assert(launches==0,'ready batteries must aim briefly before firing')
-local previous=0
-local first_launch
-for tick=1,30 do
- game.tick=tick;defense.try_intercepts(missile,surface)
- local heading=surface.defenses.abm_batteries[1].orientation
- assert(heading>=previous and heading-previous<=1/60+0.000001,'turret turns smoothly toward target')
- previous=heading
- if launches>0 then first_launch=tick;break end
+local function stock(battery) return battery.inventory.get_item_count("shahed-attack-interceptor") end
+local function total_stock()
+  local sum = 0
+  for _, battery in ipairs(batteries) do sum = sum + stock(battery) end
+  return sum
 end
-assert(first_launch and first_launch>=15 and first_launch<=30,'quarter-turn acquisition is slower but remains bounded')
-assert(launches==5,'every ready aimed battery launches')
-game.tick=first_launch+59;defense.try_intercepts(missile,surface)
-assert(launches==5,'no launch before reload')
-game.tick=first_launch+60;defense.try_intercepts(missile,surface)
-assert(launches==10,'tracking persists through the original one-second reload')
-for _,battery in ipairs(surface.defenses.abm_batteries) do
- assert(battery.energy==20000000 and battery.get_inventory().count==8,'charge resources only for actual launches')
+local function launches() return 50 - total_stock() end
+
+local missile = {id = 1, force_index = 1, position = {x = 100, y = 0}, class = "medium"}
+current.active_missiles[1] = missile
+h.check(not defense.try_intercepts(missile, current) and launches() == 0, "batteries aim before firing")
+
+local previous, first_launch = 0, nil
+for tick = 1, 40 do
+  game.tick = tick
+  defense.try_intercepts(missile, current)
+  local heading = batteries[1].orientation
+  h.check(heading >= previous and heading - previous <= rules.ABM_TURN_RATE + 1e-6, "turret turns smoothly")
+  previous = heading
+  if launches() > 0 then first_launch = tick break end
 end
-game.tick=first_launch+120;missile.position={x=193,y=0};defense.try_intercepts(missile,surface)
-assert(launches==10,'no launch outside finite radius')
-missile.position={x=0,y=0}
-for tick=game.tick+1,game.tick+30 do game.tick=tick;defense.try_intercepts(missile,surface);if launches==15 then break end end
-assert(launches==15,'close targets remain interceptable after reacquisition')
-missile.intercepted=true;game.tick=game.tick+60
-assert(defense.try_intercepts(missile,surface) and launches==15,'stop shooting destroyed missiles')
-print('PASS: smooth bounded acquisition, all ready batteries, reload, range, and resource accounting')
+h.check(first_launch and first_launch >= 15 and first_launch <= 30, "quarter-turn acquisition stays bounded")
+h.check(launches() == 2, "fire doctrine: only two interceptors fly at one target")
+h.check(ordnance.engaged(current, "m1") == 2, "engagements are counted")
+for _, battery in ipairs(batteries) do
+  h.check(battery.energy == 100000000 or battery.energy == 90000000, "energy charged only for launches")
+end
+
+-- A miss frees a slot: shoot-look-shoot.
+for _, shot in pairs(current.projectiles) do
+  shot.accuracy = 0
+end
+for tick = first_launch + 1, first_launch + 60 do
+  game.tick = tick
+  defense.try_intercepts(missile, current)
+  ordnance.update(tick)
+end
+h.check(launches() > 2, "launchers fire again after interceptors miss")
+h.check(ordnance.engaged(current, "m1") <= 2, "never more than the doctrine limit in flight")
+
+-- Destroyed targets stop new launches and orphaned rounds self-destruct.
+missile.intercepted = true
+local before = launches()
+for tick = game.tick + 1, game.tick + 40 do
+  game.tick = tick
+  h.check(defense.try_intercepts(missile, current), "destroyed missile reports done")
+  ordnance.update(tick)
+end
+h.check(launches() == before, "no launch at a destroyed missile")
+h.check(next(current.projectiles) == nil, "orphaned interceptors self-destruct and clean up")
+h.check(ordnance.engaged(current, "m1") == 0, "engagement counter released")
+
+-- Magazine: four ready canisters, then one every ten seconds.
+h.reset()
+current = h.surface_state()
+defense = require("scripts.defense")
+ordnance = require("scripts.ordnance")
+settings.global["shahed-attack-interceptors-per-target"] = {value = 8}
+local battery = h.entity({name = "shahed-attack-abm-battery", energy = 1e9,
+  inventory = h.inventory({["shahed-attack-interceptor"] = 20})})
+defense.on_entity_created(battery)
+local target = {id = 7, force_index = 1, position = {x = 0, y = -100}, class = "heavy"}
+current.active_missiles[7] = target
+for tick = 1, 400 do
+  game.tick = tick
+  defense.try_intercepts(target, current)
+end
+h.check(20 - stock(battery) == 4, "a launcher fires its four ready canisters, then waits")
+h.check(defense.launcher_status(battery).key == "reloading", "status shows reloading")
+for tick = 401, 1400 do
+  game.tick = tick
+  defense.try_intercepts(target, current)
+end
+h.check(20 - stock(battery) == 5 or 20 - stock(battery) == 6, "reloaded canisters fire one per ten seconds")
+for _, shot in pairs(current.projectiles) do
+  h.check(shot.accuracy < 0.7, "heavy missiles are harder to hit than the base accuracy")
+  break
+end
+
+-- Range limit and resource gates.
+target.position = {x = 0, y = -(rules.ABM_RANGE + 1)}
+local stock_before = stock(battery)
+for tick = 5000, 5100 do game.tick = tick; defense.try_intercepts(target, current) end
+h.check(stock(battery) == stock_before, "no launch outside the finite radius")
+target.position = {x = 0, y = -50}
+battery.energy = 0
+for tick = 5101, 5200 do game.tick = tick; defense.try_intercepts(target, current) end
+h.check(stock(battery) == stock_before, "fixed batteries need 10 MJ")
+
+h.pass("ABM acquisition, fire doctrine, shoot-look-shoot, magazines, range and costs")

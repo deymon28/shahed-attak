@@ -21,13 +21,17 @@ local function make_impact_attack(animation, effect_id)
   }
 end
 
-local function make_drone(name, health, speed, tint, effect_id, sprite_name, sprite_size, engine_file, engine_volume)
+local function make_drone(name, health, speed, tint, effect_id, sprite_name, sprite_size, engine_file, engine_volume, appearance)
+  appearance = appearance or {}
   local unit = table.deepcopy(data.raw.unit["small-biter"])
   unit.name = name
   unit.localised_name = {"entity-name." .. name}
   unit.localised_description = {"entity-description." .. name}
   unit.icon = "__shahed-attack__/graphics/icons/" .. sprite_name .. ".png"
   unit.icon_size = 64
+  if appearance.tint then
+    unit.icons = {{icon = unit.icon, icon_size = 64, tint = appearance.tint}}
+  end
   unit.max_health = health
   unit.movement_speed = speed
   unit.rotation_speed = 0.04
@@ -78,7 +82,9 @@ local function make_drone(name, health, speed, tint, effect_id, sprite_name, spr
         direction_count = 16,
         line_length = 16,
         frame_count = 8,
-        animation_speed = 0.28
+        animation_speed = 0.28,
+        tint = appearance.tint,
+        scale = appearance.scale
       },
       {
         filename = "__shahed-attack__/graphics/entity/" .. sprite_name .. "-shadow-sheet.png",
@@ -91,6 +97,7 @@ local function make_drone(name, health, speed, tint, effect_id, sprite_name, spr
         animation_speed = 0.28,
         -- The source render captures airframe shape; this offset conveys flight altitude.
         shift = {1.25, 0.75},
+        scale = appearance.scale,
         rotate_shift = false,
         draw_as_shadow = true
       }
@@ -113,7 +120,7 @@ local scout = make_drone(
 )
 local strike = make_drone(
   "shahed-attack-strike-drone",
-  180,
+  150,
   0.08,
   {r = 0.9, g = 0.55, b = 0.15, a = 1},
   "shahed-attack-strike-impact",
@@ -124,7 +131,7 @@ local strike = make_drone(
 )
 local heavy = make_drone(
   "shahed-attack-heavy-drone",
-  400,
+  320,
   0.06,
   {r = 0.75, g = 0.1, b = 0.08, a = 1},
   "shahed-attack-heavy-impact",
@@ -132,6 +139,20 @@ local heavy = make_drone(
   96,
   "drone-heavy-loop.ogg",
   0.62
+)
+
+-- Cheap decoy: strike-drone silhouette, no real warhead, fragile airframe.
+local decoy = make_drone(
+  "shahed-attack-decoy-drone",
+  70,
+  0.085,
+  {r = 0.75, g = 0.72, b = 0.6, a = 1},
+  "shahed-attack-decoy-impact",
+  "strike-drone",
+  80,
+  "drone-strike-loop.ogg",
+  0.38,
+  {tint = {r = 0.82, g = 0.8, b = 0.72, a = 1}, scale = 0.85}
 )
 
 local function make_source(name, health, sprite_name, sound_file)
@@ -195,4 +216,4 @@ local ballistic_site = make_source(
   "ballistic-site-machinery-loop.ogg"
 )
 
-data:extend({scout, strike, heavy, airfield, ballistic_site})
+data:extend({scout, strike, heavy, decoy, airfield, ballistic_site})

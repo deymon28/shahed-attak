@@ -13,7 +13,7 @@ rendering = {draw_animation = function(args)
   calls[#calls + 1] = result
   return result
 end}
-local surface = {index = 1, find_entities_filtered = function(filter)
+local surface = {index = 1, name = "nauvis", valid = true, find_entities_filtered = function(filter)
   local found = {}
   for _, entity in ipairs(entities) do
     if entity.valid and entity.name == filter.name then found[#found + 1] = entity end
@@ -29,6 +29,7 @@ local function entity(name, id)
 end
 local function reload()
   package.loaded['scripts.visual_effects'] = nil
+  package.loaded['scripts.state'] = nil
   return require('scripts.visual_effects')
 end
 local effects = reload()

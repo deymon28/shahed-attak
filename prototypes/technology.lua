@@ -27,7 +27,6 @@ ballistic_defense.icon = "__shahed-attack__/graphics/icons/abm-battery.png"
 ballistic_defense.icon_size = 64
 ballistic_defense.prerequisites = {
   "shahed-attack-air-defense",
-  "military-3",
   "rocketry",
   "advanced-circuit"
 }
@@ -45,4 +44,32 @@ ballistic_defense.unit = {
   time = 30
 }
 
-data:extend({air_defense, ballistic_defense})
+local rail_air_defense = table.deepcopy(data.raw.technology.railway)
+rail_air_defense.name = "shahed-attack-rail-air-defense"
+rail_air_defense.localised_name = {"technology-name.shahed-attack-rail-air-defense"}
+rail_air_defense.localised_description = {"technology-description.shahed-attack-rail-air-defense"}
+rail_air_defense.icons = nil
+rail_air_defense.icon = "__shahed-attack__/graphics/icons/aa-turret.png"
+rail_air_defense.icon_size = 64
+rail_air_defense.prerequisites = {"shahed-attack-air-defense", "railway"}
+rail_air_defense.effects = {{type = "unlock-recipe", recipe = "shahed-attack-aa-wagon"}}
+rail_air_defense.unit = {
+  count = 150,
+  ingredients = {{"automation-science-pack", 1}, {"logistic-science-pack", 1}},
+  time = 30
+}
+
+local rail_missile_defense = table.deepcopy(rail_air_defense)
+rail_missile_defense.name = "shahed-attack-rail-missile-defense"
+rail_missile_defense.localised_name = {"technology-name.shahed-attack-rail-missile-defense"}
+rail_missile_defense.localised_description = {"technology-description.shahed-attack-rail-missile-defense"}
+rail_missile_defense.icon = "__shahed-attack__/graphics/icons/abm-battery.png"
+rail_missile_defense.prerequisites = {"shahed-attack-ballistic-defense", "shahed-attack-rail-air-defense"}
+rail_missile_defense.effects = {{type = "unlock-recipe", recipe = "shahed-attack-abm-wagon"}}
+rail_missile_defense.unit = {
+  count = 200,
+  ingredients = {{"automation-science-pack", 1}, {"logistic-science-pack", 1}, {"chemical-science-pack", 1}},
+  time = 30
+}
+
+data:extend({air_defense, ballistic_defense, rail_air_defense, rail_missile_defense})

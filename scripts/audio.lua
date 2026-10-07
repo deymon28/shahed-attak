@@ -1,13 +1,10 @@
 local audio_policy = require("scripts.lib.audio_policy")
+local state = require("scripts.state")
 
 local audio = {}
 
 local function ensure_root()
-  storage.shahed_attack = storage.shahed_attack or {}
-  local root = storage.shahed_attack
-  root.audio_cooldowns = root.audio_cooldowns or {}
-  root.audio_counters = root.audio_counters or {}
-  return root
+  return state.root()
 end
 
 local function surface_bucket(surface_index)

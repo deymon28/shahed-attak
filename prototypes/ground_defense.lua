@@ -23,7 +23,7 @@ for _, group in pairs(data.raw) do
     end
   end
 end
-for _, name in ipairs({'recon','strike','heavy'}) do
+for _, name in ipairs({'recon','strike','heavy','decoy'}) do
   local drone = data.raw.unit['shahed-attack-'..name..'-drone']
   local kept = {}
   for _, resistance in ipairs(drone.resistances) do
@@ -68,35 +68,51 @@ rewrite = function(node)
   for _, child in pairs(node) do if type(child)=='table' then rewrite(child) end end
 end
 
-for _, pair in ipairs({{'ammo-turret','gun-turret'},{'electric-turret','laser-turret'},
-  {'fluid-turret','flamethrower-turret'},{'ammo-turret','rocket-turret'},{'ammo-turret','railgun-turret'}}) do
-  local turret=data.raw[pair[1]] and data.raw[pair[1]][pair[2]]
-  if turret then
-    turret.ignore_target_mask=turret.ignore_target_mask or {}
-    table.insert(turret.ignore_target_mask,'shahed-attack-air')
-    rewrite(turret.attack_parameters)
+-- Every ground turret (vanilla or from other mods) ignores aircraft, and its
+-- damage is moved to the ground-only families so splash cannot hit drones.
+local TURRET_TYPES = {"ammo-turret", "electric-turret", "fluid-turret"}
+local turret_categories = {["artillery-shell"] = true}
+
+local function add_categories(parameters)
+  if not parameters then return end
+  if parameters.ammo_category then turret_categories[parameters.ammo_category] = true end
+  for _, category in ipairs(parameters.ammo_categories or {}) do turret_categories[category] = true end
+end
+
+for _, turret_type in ipairs(TURRET_TYPES) do
+  for name, turret in pairs(data.raw[turret_type] or {}) do
+    if not name:find("^shahed%-attack%-") then
+      turret.ignore_target_mask = turret.ignore_target_mask or {}
+      table.insert(turret.ignore_target_mask, "shahed-attack-air")
+      if turret_type == "ammo-turret" then add_categories(turret.attack_parameters) end
+      rewrite(turret.attack_parameters)
+    end
   end
 end
 
-for _, name in ipairs({'firearm-magazine','piercing-rounds-magazine','uranium-rounds-magazine',
-  'artillery-shell','rocket','explosive-rocket','railgun-ammo'}) do
-  local ammo=data.raw.ammo[name]
-  if ammo then
-    local original=table.deepcopy(ammo.ammo_type)
+-- Ammunition fired by those turrets gets a turret-only variant with ground
+-- damage; the variant used by players and vehicles stays unchanged.
+for _, ammo in pairs(data.raw.ammo) do
+  if turret_categories[ammo.ammo_category] and ammo.ammo_type then
+    local original = table.deepcopy(ammo.ammo_type)
     if original[1] then
-      local found=false
+      local found = false
       for _, variant in ipairs(original) do
-        if variant.source_type=='turret' then rewrite(variant); found=true end
+        if variant.source_type == "turret" then rewrite(variant); found = true end
       end
       if not found then
-        local turret=table.deepcopy(original[1]); turret.source_type='turret';rewrite(turret)
-        original[#original+1]=turret
+        local turret = table.deepcopy(original[1])
+        turret.source_type = "turret"
+        rewrite(turret)
+        original[#original + 1] = turret
       end
-      ammo.ammo_type=original
+      ammo.ammo_type = original
     else
-      original.source_type='default'
-      local turret=table.deepcopy(original);turret.source_type='turret';rewrite(turret)
-      ammo.ammo_type={original,turret}
+      original.source_type = "default"
+      local turret = table.deepcopy(original)
+      turret.source_type = "turret"
+      rewrite(turret)
+      ammo.ammo_type = {original, turret}
     end
   end
 end

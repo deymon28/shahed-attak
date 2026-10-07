@@ -1,23 +1,16 @@
-package.path = './?.lua;' .. package.path
-package.loaded['scripts.alerts'] = {intercept=function() end}
-package.loaded['scripts.audio'] = {play=function() end}
-local function render(args)
-  local object = {valid=true, visible=args.visible ~= false, target=args.target, args=args}
-  object.destroy = function() object.valid=false end
-  return object
-end
-rendering = {draw_sprite=render, draw_light=render, draw_animation=render}
+local h = require("tests.lib.harness")
+h.reset()
 local smoke = 0
-local surface = {create_trivial_smoke=function() smoke=smoke+1 end, create_entity=function() end}
-game = {tick=100, get_surface=function() return surface end, forces={[1]={}}}
-local current = {projectiles={}, active_missiles={}, counters={intercepted=0}, rng_state=1234}
-storage = {shahed_attack={surfaces={[1]=current}}}
+local surface = h.nauvis
+surface.create_trivial_smoke = function() smoke = smoke + 1 end
+game.tick = 100
+local current = h.surface_state()
+local function render(args) return h.render(args) end
 local ordnance = require('scripts.ordnance')
-local battery = {valid=true, name='shahed-attack-abm-battery', position={x=10,y=20},
-  orientation=.25, force={index=1}, surface=surface}
+local battery = h.entity({name='shahed-attack-abm-battery', position={x=10,y=20}, orientation=.25})
 local missile = {id=1, position={x=1010,y=20}, force_index=1}
 current.active_missiles[1] = missile
-local shot = ordnance.launch_interceptor(current, battery, missile, 1)
+local shot = ordnance.launch_interceptor(current, battery, missile, 1, 'm1')
 assert(not shot.render.visible and not shot.light.visible,
   'The launch animation must own the rocket before it clears the container')
 assert(shot.launch_render.args.animation_speed==0 and shot.launch_render.args.animation_offset==0,
@@ -44,8 +37,9 @@ assert(shot.render.x_scale==1, 'The flight body reaches its normal scale smoothl
 
 -- Losing a target while the body still belongs to the animation removes both.
 game.tick=200
-local cancelled=ordnance.launch_interceptor(current,battery,missile,1)
-missile.finished=true;game.tick=201;ordnance.update(game.tick)
+local cancelled=ordnance.launch_interceptor(current,battery,missile,1,'m1')
+missile.finished=true
+for tick=201,240 do game.tick=tick;ordnance.update(tick) end
 assert(not cancelled.render.valid and not cancelled.light.valid and not cancelled.launch_render.valid,
   'A cancelled launch must not leave a phantom rocket in the animation')
 assert(not current.projectiles[cancelled.id], 'Cancelled projectile state is removed')

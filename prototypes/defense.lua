@@ -295,10 +295,10 @@ data:extend({
     enabled = false,
     energy_required = 20,
     ingredients = {
-      {type = "item", name = "steel-plate", amount = 50},
-      {type = "item", name = "concrete", amount = 50},
-      {type = "item", name = "electric-engine-unit", amount = 20},
-      {type = "item", name = "advanced-circuit", amount = 40},
+      {type = "item", name = "steel-plate", amount = 40},
+      {type = "item", name = "concrete", amount = 40},
+      {type = "item", name = "engine-unit", amount = 10},
+      {type = "item", name = "advanced-circuit", amount = 20},
       {type = "item", name = "radar", amount = 2}
     },
     results = {{type = "item", name = abm.name, amount = 1}}
@@ -307,13 +307,111 @@ data:extend({
     type = "recipe",
     name = interceptor.name,
     enabled = false,
-    energy_required = 12,
+    energy_required = 10,
     ingredients = {
-      {type = "item", name = "explosive-rocket", amount = 2},
-      {type = "item", name = "processing-unit", amount = 5},
-      {type = "item", name = "explosives", amount = 10},
-      {type = "item", name = "low-density-structure", amount = 5}
+      {type = "item", name = "rocket", amount = 2},
+      {type = "item", name = "advanced-circuit", amount = 4},
+      {type = "item", name = "explosives", amount = 4},
+      {type = "item", name = "steel-plate", amount = 4}
     },
     results = {{type = "item", name = interceptor.name, amount = 1}}
+  }
+})
+
+-- Rail air defense: a cargo wagon carrying a gun mount or a missile launcher.
+-- The turret head is drawn and aimed by script (scripts/defense.lua).
+local function head_animation(name, filename, size, scale)
+  return {
+    type = "animation",
+    name = name,
+    layers = {
+      {
+        filename = filename, priority = "high", width = size, height = size,
+        frame_count = 64, line_length = 8, scale = scale, animation_speed = 1
+      },
+      {
+        filename = (filename:gsub("%.png$", "-shadow.png")), priority = "high", width = size * 2, height = size,
+        frame_count = 64, line_length = 8, scale = scale, animation_speed = 1, draw_as_shadow = true
+      }
+    }
+  }
+end
+
+local vanilla_wagon = data.raw["cargo-wagon"]["cargo-wagon"]
+
+local function make_wagon(name, overlay_icon, color, inventory_size)
+  local wagon = table.deepcopy(vanilla_wagon)
+  wagon.name = name
+  wagon.localised_name = {"entity-name." .. name}
+  wagon.localised_description = {"entity-description." .. name}
+  wagon.minable = {mining_time = 0.5, result = name}
+  wagon.inventory_size = inventory_size
+  wagon.max_health = 800
+  wagon.color = color
+  wagon.icons = {
+    {icon = vanilla_wagon.icon, icon_size = vanilla_wagon.icon_size or 64},
+    {icon = overlay_icon, icon_size = 64, scale = 0.32, shift = {8, -8}}
+  }
+  wagon.icon = nil
+  return wagon
+end
+
+local function make_wagon_item(wagon, order)
+  local item = table.deepcopy(data.raw["item-with-entity-data"]["cargo-wagon"])
+  item.name = wagon.name
+  item.localised_name = {"entity-name." .. wagon.name}
+  item.icons = wagon.icons
+  item.icon = nil
+  item.place_result = wagon.name
+  item.order = "z[shahed-attack]-" .. order
+  return item
+end
+
+local aa_wagon = make_wagon("shahed-attack-aa-wagon", "__shahed-attack__/graphics/icons/aa-turret.png",
+  {r = 0.42, g = 0.48, b = 0.28, a = 0.8}, 8)
+local abm_wagon = make_wagon("shahed-attack-abm-wagon", "__shahed-attack__/graphics/icons/abm-battery.png",
+  {r = 0.55, g = 0.45, b = 0.25, a = 0.8}, 4)
+
+data:extend({
+  head_animation("shahed-attack-aa-wagon-head", "__shahed-attack__/graphics/entity/aa-turret-head-prepared.png", 160, 0.62),
+  head_animation("shahed-attack-abm-wagon-head", "__shahed-attack__/graphics/entity/abm-battery-head-prepared.png", 192, 0.65),
+  aa_wagon,
+  abm_wagon,
+  make_wagon_item(aa_wagon, "c[aa-wagon]"),
+  make_wagon_item(abm_wagon, "d[abm-wagon]"),
+  {
+    type = "recipe",
+    name = aa_wagon.name,
+    enabled = false,
+    energy_required = 8,
+    ingredients = {
+      {type = "item", name = "cargo-wagon", amount = 1},
+      {type = "item", name = "shahed-attack-aa-turret", amount = 1},
+      {type = "item", name = "steel-plate", amount = 20}
+    },
+    results = {{type = "item", name = aa_wagon.name, amount = 1}}
+  },
+  {
+    type = "recipe",
+    name = abm_wagon.name,
+    enabled = false,
+    energy_required = 15,
+    ingredients = {
+      {type = "item", name = "cargo-wagon", amount = 1},
+      {type = "item", name = "shahed-attack-abm-battery", amount = 1},
+      {type = "item", name = "steel-plate", amount = 30}
+    },
+    results = {{type = "item", name = abm_wagon.name, amount = 1}}
+  },
+  {
+    type = "shortcut",
+    name = "shahed-attack-stats",
+    order = "z[shahed-attack]",
+    action = "lua",
+    toggleable = true,
+    icon = "__shahed-attack__/graphics/icons/early-warning-radar.png",
+    icon_size = 64,
+    small_icon = "__shahed-attack__/graphics/icons/early-warning-radar.png",
+    small_icon_size = 64
   }
 })

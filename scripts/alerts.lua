@@ -1,24 +1,21 @@
 local alert_policy = require("scripts.lib.alert_policy")
+local config = require("scripts.lib.config")
 
 local alerts = {}
 local WARNING_DURATION_TICKS = { [1] = 360, [2] = 270 }
 local WARNING_SOUNDS = { [1] = "shahed-attack-air-raid-siren", [2] = "shahed-attack-ballistic-warning" }
+local ALERT_ICONS = {
+  ["air-raid"] = {type = "virtual", name = "shahed-attack-air-raid-signal"},
+  ballistic = {type = "virtual", name = "shahed-attack-ballistic-signal"},
+  default = {type = "item", name = "shahed-attack-early-warning-radar"}
+}
 
 local function user_setting(player, name, fallback)
-  if not player or not player.valid then
-    return fallback
-  end
-  local player_settings = settings.get_player_settings(player)
-  local setting = player_settings and player_settings[name]
-  if setting == nil then
-    return fallback
-  end
-  return setting.value
+  return config.player(player, name, fallback)
 end
 
 local function delivery_mode()
-  local entry = settings.global["shahed-attack-alert-delivery"]
-  return alert_policy.normalize(entry and entry.value or "both")
+  return alert_policy.normalize(config.global("shahed-attack-alert-delivery"))
 end
 
 local function sound_event_key(request, player_index)
@@ -52,7 +49,7 @@ function alerts.notify(request)
     if request.entity and request.entity.valid then
       player.add_custom_alert(
         request.entity,
-        {type = "item", name = "shahed-attack-early-warning-radar"},
+        ALERT_ICONS[request.alert_type or "default"] or ALERT_ICONS.default,
         request.message,
         true
       )
@@ -188,7 +185,7 @@ function alerts.intercept(force, entity, success, probability)
     force = force,
     entity = entity,
     message = {key, math.floor(probability * 100 + 0.5)},
-    always_print = true
+    always_print = false
   })
 end
 

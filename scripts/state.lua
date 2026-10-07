@@ -1,135 +1,118 @@
+-- Owns the persistent storage layout. Every module reads its tables through
+-- state.root() / state.ensure_surface() so defaults live in one place.
 local state = {}
 
-local SCHEMA_VERSION = 5
+state.SCHEMA_VERSION = 6
+-- The air war is fought on the starting planet only.
+state.SUPPORTED_SURFACE = "nauvis"
 
-local function ensure_counters(surface_state)
-  surface_state.counters = surface_state.counters or {}
-  for _, name in ipairs({
-    "events", "raids", "recon", "ballistic", "intercepted",
-    "wreck_safe", "wreck_fuel", "wreck_warhead",
-    "ballistic_impacts", "ballistic_cleanups"
-  }) do
-    surface_state.counters[name] = surface_state.counters[name] or 0
-  end
+local COUNTERS = {
+  "events", "raids", "recon", "ballistic", "intercepted",
+  "wreck_safe", "wreck_fuel", "wreck_warhead",
+  "ballistic_impacts", "ballistic_cleanups",
+  "drones_launched", "decoys_launched", "drones_destroyed", "drone_impacts",
+  "interceptor_launches", "interceptor_encounters", "interceptor_misses", "interceptor_drone_hits",
+  "flak_shots", "flak_hits", "flak_misses", "sources_generated"
+}
+
+local ROOT_TABLES = {
+  "surfaces", "alert_sound_events", "pending_alert_sounds", "alert_sound_playback",
+  "radar_relays", "radar_relay_registrations", "audio_cooldowns", "audio_counters",
+  "targets", "target_registrations", "scan_queue",
+  "source_registrations", "source_scan_queue", "source_decisions",
+  "defense_registrations", "visual_records", "visual_registrations", "visual_active_launches",
+  "range_renders", "range_registrations"
+}
+
+local SURFACE_TABLES = {
+  "intelligence", "active_drones", "active_missiles", "alerted_events", "warning_history",
+  "projectiles", "engagements", "battery_next_shot", "battery_tracking", "battery_modes",
+  "launcher_rounds", "wagon_state", "ballistic_readiness", "pending_events"
+}
+
+function state.supported(surface)
+  return surface ~= nil and surface.valid and surface.name == state.SUPPORTED_SURFACE
 end
 
-local function ensure_root()
+function state.root()
   storage.shahed_attack = storage.shahed_attack or {}
   local root = storage.shahed_attack
-  root.schema_version = SCHEMA_VERSION
-  root.surfaces = root.surfaces or {}
-  root.registration_owners = root.registration_owners or {}
+  for _, name in ipairs(ROOT_TABLES) do
+    root[name] = root[name] or {}
+  end
   root.next_event_id = root.next_event_id or 1
-  root.alert_sound_events = root.alert_sound_events or {}
   root.alert_counters = root.alert_counters or {global_warning_dispatches = 0}
-  root.radar_relays = root.radar_relays or {}
-  root.radar_relay_registrations = root.radar_relay_registrations or {}
-  root.audio_cooldowns = root.audio_cooldowns or {}
-  root.audio_counters = root.audio_counters or {}
-  root.source_registrations = root.source_registrations or {}
-  root.source_scan_queue = root.source_scan_queue or {}
-  root.defense_registrations = root.defense_registrations or {}
-  root.visual_records = root.visual_records or {}
-  root.visual_registrations = root.visual_registrations or {}
   root.visual_counters = root.visual_counters or {ballistic_launches = 0, abm_launches = 0}
   return root
 end
 
 local function ensure_surface_fields(surface, surface_state)
   local ticks_per_day = math.max(surface.ticks_per_day, 1)
-  local current_day = math.floor(game.tick / ticks_per_day)
-  if surface_state.created_tick == nil then surface_state.created_tick = game.tick end
-  if surface_state.next_raid_tick == nil then surface_state.next_raid_tick = game.tick + 2 * ticks_per_day end
-  if surface_state.next_ballistic_day == nil then
-    surface_state.next_ballistic_day = math.max(20, current_day + 2)
+  surface_state.created_tick = surface_state.created_tick or game.tick
+  surface_state.next_raid_tick = surface_state.next_raid_tick or (game.tick + 2 * ticks_per_day)
+  surface_state.next_ballistic_tick = surface_state.next_ballistic_tick or game.tick
+  surface_state.rng_state = surface_state.rng_state
+    or ((surface.map_gen_settings.seed or 1) + surface.index * 7919) % 2147483647
+  surface_state.combat_rng_state = surface_state.combat_rng_state or surface_state.rng_state
+  for _, name in ipairs(SURFACE_TABLES) do
+    surface_state[name] = surface_state[name] or {}
   end
-  if surface_state.last_daytime == nil then surface_state.last_daytime = surface.daytime end
-  if surface_state.rng_state == nil then
-    surface_state.rng_state = ((surface.map_gen_settings.seed or 1) + surface.index * 7919) % 2147483647
-  end
-  surface_state.intelligence = surface_state.intelligence or {}
-  surface_state.active_drones = surface_state.active_drones or {}
-  surface_state.active_missiles = surface_state.active_missiles or {}
-  surface_state.alerted_events = surface_state.alerted_events or {}
   surface_state.sources = surface_state.sources or {}
   surface_state.sources.airfields = surface_state.sources.airfields or {}
   surface_state.sources.ballistic_sites = surface_state.sources.ballistic_sites or {}
   surface_state.defenses = surface_state.defenses or {}
-  surface_state.defenses.radars = surface_state.defenses.radars or {}
-  surface_state.defenses.aa_turrets = surface_state.defenses.aa_turrets or {}
-  surface_state.defenses.abm_batteries = surface_state.defenses.abm_batteries or {}
-  surface_state.projectiles = surface_state.projectiles or {}
-  surface_state.battery_next_shot = surface_state.battery_next_shot or {}
-  surface_state.combat_rng_state = surface_state.combat_rng_state or surface_state.rng_state
-  surface_state.warning_history = surface_state.warning_history or {}
-  surface_state.ballistic_readiness = surface_state.ballistic_readiness or {}
-  ensure_counters(surface_state)
-  for _, missile in pairs(surface_state.active_missiles) do
-    missile.position = missile.position or missile.origin or missile.target_position
-    missile.previous_position = missile.previous_position or {
-      x = missile.position.x,
-      y = missile.position.y
-    }
-    missile.progress = missile.progress or 0
-    missile.step_distance = missile.step_distance or 0
-    if missile.distance_to_target == nil and missile.target_position then
-      local dx = missile.position.x - missile.target_position.x
-      local dy = missile.position.y - missile.target_position.y
-      missile.distance_to_target = math.sqrt(dx * dx + dy * dy)
-    end
-    missile.impact_count = missile.impact_count or 0
-    missile.cleanup_count = missile.cleanup_count or 0
-    missile.attempted_batteries = missile.attempted_batteries or {}
-    missile.probabilities = missile.probabilities or {}
-    missile.trail_emissions = missile.trail_emissions or 0
+  for _, name in ipairs({"radars", "aa_turrets", "abm_batteries", "aa_wagons", "abm_wagons"}) do
+    surface_state.defenses[name] = surface_state.defenses[name] or {}
+  end
+  surface_state.counters = surface_state.counters or {}
+  for _, name in ipairs(COUNTERS) do
+    surface_state.counters[name] = surface_state.counters[name] or 0
   end
 end
 
-local function new_surface_state(surface)
-  local ticks_per_day = math.max(surface.ticks_per_day, 1)
-  local current_day = math.floor(game.tick / ticks_per_day)
-  return {
-    created_tick = game.tick,
-    next_raid_tick = game.tick + 2 * ticks_per_day,
-    next_ballistic_day = math.max(20, current_day + 2),
-    last_daytime = surface.daytime,
-    rng_state = ((surface.map_gen_settings.seed or 1) + surface.index * 7919) % 2147483647,
-    intelligence = {},
-    active_drones = {},
-    active_missiles = {},
-    alerted_events = {},
-    sources = {airfields = {}, ballistic_sites = {}},
-    defenses = {radars = {}, aa_turrets = {}, abm_batteries = {}},
-    counters = {
-      events = 0,
-      raids = 0,
-      recon = 0,
-      ballistic = 0,
-      intercepted = 0,
-      wreck_safe = 0,
-      wreck_fuel = 0,
-      wreck_warhead = 0,
-      ballistic_impacts = 0,
-      ballistic_cleanups = 0
-    }
-  }
-end
-
+-- Returns nil for surfaces outside the air war.
 function state.ensure_surface(surface)
-  local root = ensure_root()
-  if not root.surfaces[surface.index] then
-    root.surfaces[surface.index] = new_surface_state(surface)
+  if not state.supported(surface) then
+    return nil
   end
+  local root = state.root()
   local surface_state = root.surfaces[surface.index]
+  if not surface_state then
+    surface_state = {}
+    root.surfaces[surface.index] = surface_state
+  end
   ensure_surface_fields(surface, surface_state)
   return surface_state
 end
 
+function state.get_surface(surface_index)
+  return storage.shahed_attack and storage.shahed_attack.surfaces
+    and storage.shahed_attack.surfaces[surface_index]
+end
+
+function state.initialize()
+  state.root()
+  for _, surface in pairs(game.surfaces) do
+    state.ensure_surface(surface)
+  end
+end
+
+function state.next_event_id()
+  local root = state.root()
+  local result = root.next_event_id
+  root.next_event_id = result + 1
+  return result
+end
+
+-- Drops warning diagnostics ten minutes after their event ended.
 function state.prune(tick)
-  for _, current in pairs(storage.shahed_attack.surfaces) do
+  for _, current in pairs(state.root().surfaces) do
     local active = {}
     for _, drone in pairs(current.active_drones) do active[drone.event_id] = true end
     for id in pairs(current.active_missiles) do active[id] = true end
+    for _, pending in pairs(current.pending_events) do
+      if pending.event_id then active[pending.event_id] = true end
+    end
     for id, warning in pairs(current.warning_history) do
       if not active[id] and tick - warning.tick > 60 * 60 * 10 then
         current.warning_history[id] = nil
@@ -139,22 +122,72 @@ function state.prune(tick)
   end
 end
 
-function state.initialize()
-  local root = ensure_root()
-  for _, surface in pairs(game.surfaces) do
-    state.ensure_surface(surface)
+-- Forget everything that belonged to a deleted surface.
+function state.forget_surface(surface_index)
+  local root = state.root()
+  root.surfaces[surface_index] = nil
+  root.targets[surface_index] = nil
+  root.scan_queue[surface_index] = nil
+  root.source_scan_queue[surface_index] = nil
+  root.source_decisions[surface_index] = nil
+  root.audio_cooldowns[surface_index] = nil
+  for _, map_name in ipairs({"target_registrations", "source_registrations", "defense_registrations"}) do
+    for registration, record in pairs(root[map_name]) do
+      if record.surface_index == surface_index then root[map_name][registration] = nil end
+    end
   end
 end
 
-function state.get_surface(surface_index)
-  return storage.shahed_attack and storage.shahed_attack.surfaces[surface_index]
-end
-
-function state.next_event_id()
-  local root = ensure_root()
-  local result = root.next_event_id
-  root.next_event_id = result + 1
-  return result
+-- One-time conversion of schema 5 (and older) tables.
+function state.migrate()
+  local root = state.root()
+  local previous = root.schema_version or 1
+  if previous < 6 then
+    -- Target records keep their unit numbers; targeting.initialize compacts the lists.
+    if root.destroyed_registrations then
+      root.target_registrations = root.destroyed_registrations
+    end
+    root.destroyed_registrations = nil
+    -- Registrations are recreated by the module initializers with unit numbers.
+    root.source_registrations = {}
+    root.defense_registrations = {}
+    for surface_index, current in pairs(root.surfaces) do
+      local surface = game.get_surface(surface_index)
+      if not state.supported(surface) then
+        root.surfaces[surface_index] = nil
+      else
+        -- Lists with `false` holes become maps keyed by unit number.
+        for _, group in pairs({current.sources or {}, current.defenses or {}}) do
+          for name, list in pairs(group) do
+            local keyed = {}
+            for _, entity in pairs(list) do
+              if entity and entity.valid and entity.unit_number then keyed[entity.unit_number] = entity end
+            end
+            group[name] = keyed
+          end
+        end
+        if current.next_ballistic_day and not current.next_ballistic_tick then
+          current.next_ballistic_tick = math.max(game.tick,
+            math.floor(current.next_ballistic_day * math.max(surface.ticks_per_day, 1)))
+        end
+        current.next_ballistic_day = nil
+        current.last_daytime = nil
+        -- Readiness used to store the preparation deadline (chemistry + 30 min);
+        -- it now stores the chemistry tick so the preparation time is a setting.
+        for force_index, deadline in pairs(current.ballistic_readiness or {}) do
+          current.ballistic_readiness[force_index] = math.max(0, deadline - 30 * 60 * 60)
+        end
+        for _, missile in pairs(current.active_missiles or {}) do
+          -- Missiles launched before classes existed carry the full warhead.
+          missile.class = missile.class or "heavy"
+          missile.tier = nil
+          missile.attempted_batteries = nil
+          missile.probabilities = nil
+        end
+      end
+    end
+  end
+  root.schema_version = state.SCHEMA_VERSION
 end
 
 return state

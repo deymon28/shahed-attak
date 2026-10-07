@@ -1,0 +1,7 @@
+* text=auto eol=lf
+*.png binary
+*.ogg binary
+*.mp3 binary
+*.blend binary
+*.zip binary
+*.ps1 text eol=crlf

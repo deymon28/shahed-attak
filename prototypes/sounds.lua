@@ -40,6 +40,7 @@ sound_source.working_sound = {
 data:extend({
   sound("drone-flyby", "drone-flyby.ogg", 0.65),
   sound("flak-burst", "flak-burst.ogg", 0.62),
+  sound("flak-shot", "flak-shot.ogg", 0.48),
   sound("drone-impact", "drone-impact.ogg", 0.78),
   sound("heavy-impact", "heavy-impact.ogg", 0.9),
   sound("wreck-impact", "wreck-impact.ogg", 0.7),
