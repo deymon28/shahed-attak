@@ -1,0 +1,143 @@
+---------------------------------------------------------------------------------------------------
+Version: 0.6.7
+Date: 2026-09-05
+  Features:
+    - Add an individual ABM battery target selector beside its native inventory: ballistic missiles only (default), ballistic missiles and Shaheds, or Shaheds only.
+    - Save each battery mode independently and prioritize ballistic acquisition in mixed mode.
+    - Reuse interceptor flight, accuracy, range, reload and resource costs for strike and heavy drones; launched interceptors finish after mode changes.
+---------------------------------------------------------------------------------------------------
+Version: 0.6.6
+Date: 2026-09-05
+  Bugfixes:
+    - Prevent the interceptor flight sprite from appearing above the ABM battery while its launch animation still owns the rocket.
+    - Continue flight from geometry-calibrated canister exit positions for all 64 headings, with a smooth size and heading transition and complete cancellation cleanup.
+---------------------------------------------------------------------------------------------------
+Version: 0.6.5
+Date: 2026-09-05
+  Changes:
+    - Slow ABM acquisition, turret rotation and launch playback slightly further; soften the interceptor's initial speed and acceleration while retaining cruise speed, accuracy and reload timing.
+---------------------------------------------------------------------------------------------------
+Version: 0.6.4
+Date: 2026-09-05
+  Graphics:
+    - Restore visible geometry-cast ground shadows for AA turrets, ABM batteries, early-warning radars, airfields and ballistic sites.
+    - Preserve full shadow coverage for native engine shading and use wider shadow frames while keeping building foundations anchored.
+---------------------------------------------------------------------------------------------------
+Version: 0.6.3
+Date: 2026-09-05
+  Graphics:
+    - Restore visible flight altitude for reconnaissance, strike and heavy drones by separating their ground shadows from their airframes in a fixed world direction.
+---------------------------------------------------------------------------------------------------
+Version: 0.6.2
+Date: 2026-09-05
+  Bugfixes:
+    - Repeat full global warning cycles while detected threats remain alive; stop repeating after destruction, impact or reconnaissance return.
+    - Preserve ballistic priority, personal mute and circuit-only delivery during repeated warnings.
+  Sounds:
+    - Remove persistent narrow compressor tones from radar, airfield and ballistic-site idle recordings while retaining quiet mechanical rumble.
+---------------------------------------------------------------------------------------------------
+Version: 0.6.1
+Date: 2026-09-05
+  Changes:
+    - Add a short smooth ABM acquisition turn, slightly slower launch animation and gentler initial interceptor acceleration; retain cruise speed, accuracy and reload cadence.
+  Bugfixes:
+    - Keep the reconnaissance airframe and its textures throughout the falling-wreck animation instead of switching to a strike drone.
+---------------------------------------------------------------------------------------------------
+Version: 0.6.0
+Date: 2026-09-05
+  Graphics:
+    - Replace primitive artwork with detailed imported aircraft, AA, ABM and radar geometry, retained source materials and shared generated surface detail.
+    - Rebuild airfield and silo machinery with generated fixed-camera surface paint, real moving geometry and projected shadows.
+    - Render all 64 ABM launch directions; animate a torn wing and independent wreck tumble.
+    - Retain selected original missile and ammunition artwork for readability.
+  Bugfixes:
+    - Hide the closed silo hatch throughout launch, then restore it after the cover closes; preserve the state over save/reload.
+    - Prevent staggered warning events from repeatedly overlapping sirens while allowing immediate ballistic priority.
+  Sounds:
+    - Retain the reviewed set of 22 processed recordings and verify individual headroom and loop seams.
+---------------------------------------------------------------------------------------------------
+Version: 0.5.0
+Date: 2026-09-05
+  Features:
+    - Added true Blender models, directional assembly shadows and mechanical animations for all military entities.
+    - Replaced instant defense lines with traveling flak and fast guided interceptors.
+    - Added finite 192-tile ABM engagement, simultaneous batteries, one-second repeat launches and independent 70% encounter chance.
+    - Added 384-tile drone and 2048-tile ballistic radar detection with ETA-gated early warnings and corrected incoming bearings.
+    - Delayed natural ballistics until day 20, evolution 0.35 and 30 minutes after chemical science.
+    - Added recorded-source combat, machinery and warning audio with redistribution provenance.
+    - Added schema 5 migration preserving active threats, schedules and preferences.
+  Bugfixes:
+    - Excluded drones from vanilla stationary targeting and incidental turret damage while preserving player and vehicle weapons.
+    - Isolated turret tree-fire propagation without changing ordinary ground combat.
+    - Made natural attacks originate only at real destructible bases; fixed rare source placement and slow existing-map backfill.
+    - Fixed distant drones wandering away when crossing disconnected generated regions.
+    - Removed restrictive ABM geometry and one-attempt gates; stopped RNG state from overwriting combat outcomes.
+    - Corrected overlay scales, paired head shadows and hidden radar relay wiring.
+
+---------------------------------------------------------------------------------------------------
+Version: 0.4.0
+Date: 2026-09-04
+  Features:
+    - Added non-positional per-player warning delivery with global-sound, circuit-only, and combined modes.
+    - Added radar air-raid and ballistic virtual signals with direct red/green wiring and a 600-tick latch.
+    - Added 22 original generated sounds for drones, defenses, impacts, ballistics, radar, infrastructure, and warnings.
+    - Added distinct 16-direction, eight-frame reconnaissance, strike, and heavy drone artwork with airborne shadows.
+    - Added animated airfields, ballistic sites, radar alert state, fully custom AA recoil, and directional ABM launch visuals.
+    - Added eight-direction, twelve-frame, 90-tick falling wrecks with exactly one safe, fuel, or warhead outcome.
+    - Added automatic idempotent 0.3.1 save migration and complete runtime diagnostics.
+  Bugfixes:
+    - Fixed falling wreck projectiles using target positions only as headings and flying forever.
+    - Preserved existing raid schedules during configuration changes.
+    - Kept unrelated raid members alive when one drone, target, render object, or warning entity becomes invalid.
+    - Replaced staged ballistic movement with clamped per-tick interpolation and one termination path.
+
+---------------------------------------------------------------------------------------------------
+Version: 0.3.1
+Date: 2026-09-04
+  Bugfixes:
+    - Fixed every surviving raid member disappearing when its selected production target was destroyed and no replacement target was available.
+    - Strike drones now continue to the last known target coordinates; reconnaissance drones return to their origin instead of being silently deleted.
+    - Added parallel approach lanes so drones assigned to targets on opposite sides no longer cross through a tight mid-flight cluster.
+
+---------------------------------------------------------------------------------------------------
+Version: 0.3.0
+Date: 2026-09-04
+  Changes:
+    - Reduced normal raid groups to two through six drones, with a seven-drone reconnaissance peak and a hard cap of twelve.
+    - Added wide, staggered spawn formations and distributed raid members across distinct production targets.
+    - Reworked flak into a probabilistic weapon with visible misses, 36-tile range, slower fire, and 30 damage per successful hit.
+    - Fixed falling wrecks so every destroyed drone lands after travelling eight through fourteen tiles instead of flying forever.
+    - Replaced the aircraft with a broader dark delta-wing design based on the supplied silhouette reference.
+    - Added a 32-frame animated radar sweep with moving illumination and a pulsing scan return.
+    - Added unique flak-magazine and interceptor-missile inventory artwork.
+    - Reduced the administrator heavy-raid test command from twelve to eight aircraft.
+
+---------------------------------------------------------------------------------------------------
+Version: 0.2.0
+Date: 2026-09-04
+  Changes:
+    - Replaced the drone artwork with a recognizable delta-wing pusher-propeller design.
+    - Added four-frame propeller animation for all sixteen flight directions.
+    - Added a dedicated animated burning wreck sprite with smoke and forward crash travel.
+    - Moved all aircraft and launch infrastructure to an independent hostile air force allied with biters.
+    - Changed strike navigation to fixed production targets so drones no longer chase characters.
+    - Added moving elliptical reconnaissance routes with varied radii, phase, and direction.
+    - Reduced aircraft speeds and disabled biter return-to-spawner behavior.
+    - Made drone impacts more visible with persistent craters and layered secondary explosions.
+    - Made ballistic flight update every tick with a continuous trail and a five-to-ten-second flight time.
+    - Greatly increased ballistic blast radius, damage falloff, fires, and impact effects.
+    - Fixed crashes caused by invalidated ballistic targets and missing falling-wreck projectile targets.
+
+---------------------------------------------------------------------------------------------------
+Version: 0.1.0
+Date: 2026-09-04
+  Features:
+    - Added reconnaissance, strike, and heavy aerial enemy drones.
+    - Added enemy drone airfields and ballistic launch sites near biter nests.
+    - Added production-weighted targeting and reconnaissance bonuses.
+    - Added collisionless flight over walls and terrain with ordinary-weapon vulnerability.
+    - Added falling wreck outcomes with safe, fuel, and warhead variants.
+    - Added rare dusk ballistic strikes, terminal impact effects, and double salvos.
+    - Added early-warning radar, anti-air turret, flak ammunition, missile-defense battery, and interceptors.
+    - Added English and Russian localization, runtime settings, admin commands, and a remote interface.
+    - Added original sprites, icons, alert sounds, automated tests, and release packaging.

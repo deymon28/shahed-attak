@@ -1,0 +1,1264 @@
+{
+  "schema_version": 1,
+  "pipeline": "Recorded CC0 sources, edited and layered; no synthetic oscillator/noise generation.",
+  "sample_rate": 48000,
+  "versions": {
+    "numpy": "2.2.6",
+    "scipy": "1.16.2",
+    "soundfile": "0.14.0",
+    "libsndfile": "1.2.2",
+    "ffmpeg": "ffmpeg version n7.1.1-19-g4c78a357d0-20250523 Copyright (c) 2000-2025 the FFmpeg developers"
+  },
+  "assets": {
+    "drone-recon-loop.ogg": {
+      "sha256": "e467920277e58b9751c18a695462f365f16c704de0c0d794b791d965818323d2",
+      "bytes": 45438,
+      "spec": {
+        "duration": 4.0,
+        "loop": true,
+        "target_rms_dbfs": -20.5,
+        "layers": [
+          {
+            "source": "rc-engine",
+            "start": 5.0,
+            "duration": 4.6,
+            "speed": 1.24,
+            "gain": 1,
+            "highpass": 130,
+            "lowpass": 4700,
+            "offset": 0.0,
+            "attack": 0.004,
+            "release": 0.14,
+            "reject_tones": []
+          }
+        ],
+        "description": "Higher, lean gasoline-propeller buzz with natural RPM variation."
+      },
+      "metrics": {
+        "sample_rate": 48000,
+        "channels": 1,
+        "duration": 4.0,
+        "peak_dbfs": -4.56127724747711,
+        "true_peak_dbfs": -4.545806374485814,
+        "rms_dbfs": -20.59963017015803,
+        "dc_offset": 5.720719366119434e-07,
+        "clipped_samples": 0,
+        "loop_seam_delta": 0.0011969953775405884,
+        "edge_rms_ratio": 0.5992002735863806,
+        "spectral_centroid_hz": 1130.716567458009
+      },
+      "source_sha256": {
+        "rc-engine": "848c6cc5ad8bfe624dd923e741f2ce0636c8e491ae235b698b064772e3b2f84e"
+      }
+    },
+    "drone-strike-loop.ogg": {
+      "sha256": "56ad8c1fc56cc052e1be1d7bdbf1eb18ba08213283f7638d256ec47b573bd365",
+      "bytes": 62993,
+      "spec": {
+        "duration": 4.8,
+        "loop": true,
+        "target_rms_dbfs": -20,
+        "layers": [
+          {
+            "source": "rc-engine",
+            "start": 6.1,
+            "duration": 5.4,
+            "speed": 0.96,
+            "gain": 1,
+            "highpass": 65,
+            "lowpass": 4300,
+            "offset": 0.0,
+            "attack": 0.004,
+            "release": 0.14,
+            "reject_tones": []
+          }
+        ],
+        "description": "Close midrange gasoline-propeller engine with irregular mechanical texture."
+      },
+      "metrics": {
+        "sample_rate": 48000,
+        "channels": 1,
+        "duration": 4.8,
+        "peak_dbfs": -4.452977416043076,
+        "true_peak_dbfs": -4.445802736758727,
+        "rms_dbfs": -20.067595844890302,
+        "dc_offset": -1.4415925251627629e-05,
+        "clipped_samples": 0,
+        "loop_seam_delta": 0.0004093386232852936,
+        "edge_rms_ratio": 0.7230690796997343,
+        "spectral_centroid_hz": 929.1979671432035
+      },
+      "source_sha256": {
+        "rc-engine": "848c6cc5ad8bfe624dd923e741f2ce0636c8e491ae235b698b064772e3b2f84e"
+      }
+    },
+    "drone-heavy-loop.ogg": {
+      "sha256": "ec6042163519be2b056ea751358b7b6a8ddd5a063caa6faabd24918c976e827d",
+      "bytes": 46789,
+      "spec": {
+        "duration": 5.2,
+        "loop": true,
+        "target_rms_dbfs": -19.5,
+        "layers": [
+          {
+            "source": "rc-engine",
+            "start": 5.6,
+            "duration": 5.8,
+            "speed": 0.72,
+            "gain": 0.86,
+            "highpass": 40,
+            "lowpass": 3000,
+            "offset": 0.0,
+            "attack": 0.004,
+            "release": 0.14,
+            "reject_tones": []
+          },
+          {
+            "source": "propeller-plane",
+            "start": 6,
+            "duration": 5.8,
+            "speed": 0.77,
+            "gain": 0.3,
+            "highpass": 35,
+            "lowpass": 1050,
+            "offset": 0.0,
+            "attack": 0.004,
+            "release": 0.14,
+            "reject_tones": []
+          }
+        ],
+        "description": "Slower engine and low recorded aircraft layer with darker exhaust tone."
+      },
+      "metrics": {
+        "sample_rate": 48000,
+        "channels": 1,
+        "duration": 5.2,
+        "peak_dbfs": -4.361100445740185,
+        "true_peak_dbfs": -4.353089544599399,
+        "rms_dbfs": -19.568317643151694,
+        "dc_offset": -2.479627411212904e-05,
+        "clipped_samples": 0,
+        "loop_seam_delta": 0.0037899427115917206,
+        "edge_rms_ratio": 0.5724041480455203,
+        "spectral_centroid_hz": 627.2049595088797
+      },
+      "source_sha256": {
+        "rc-engine": "848c6cc5ad8bfe624dd923e741f2ce0636c8e491ae235b698b064772e3b2f84e",
+        "propeller-plane": "f93450083cb53af7ed272a843bf07d75680116110e2af0c8d458cebadf6e5476"
+      }
+    },
+    "drone-flyby.ogg": {
+      "sha256": "616b1bf9ac86ea9bd6d73706deb871f1d55a15231775718f7e5d7edaafa1c54a",
+      "bytes": 46307,
+      "spec": {
+        "duration": 3.0,
+        "loop": false,
+        "target_rms_dbfs": -20,
+        "layers": [
+          {
+            "source": "rc-engine",
+            "start": 7.6,
+            "duration": 3,
+            "speed": 1,
+            "gain": 1,
+            "highpass": 70,
+            "lowpass": 5500,
+            "offset": 0.0,
+            "attack": 0.4,
+            "release": 0.7,
+            "reject_tones": []
+          }
+        ],
+        "description": "Natural close pass and receding RPM from the recorded RC aircraft."
+      },
+      "metrics": {
+        "sample_rate": 48000,
+        "channels": 1,
+        "duration": 3.0,
+        "peak_dbfs": -4.436318894096907,
+        "true_peak_dbfs": -4.399247415711632,
+        "rms_dbfs": -20.079358251645033,
+        "dc_offset": 7.006850839672309e-06,
+        "clipped_samples": 0,
+        "loop_seam_delta": 5.6208354379805314e-06,
+        "edge_rms_ratio": 0.04214397072995841,
+        "spectral_centroid_hz": 1058.1025600531898
+      },
+      "source_sha256": {
+        "rc-engine": "848c6cc5ad8bfe624dd923e741f2ce0636c8e491ae235b698b064772e3b2f84e"
+      }
+    },
+    "flak-shot.ogg": {
+      "sha256": "9b0575d52789053b43fe1b66c28a55cfcbd644c3cee6f5d4880723b9b03f3784",
+      "bytes": 9460,
+      "spec": {
+        "duration": 0.5,
+        "loop": false,
+        "target_rms_dbfs": -19,
+        "layers": [
+          {
+            "source": "gunshot",
+            "start": 11.656,
+            "duration": 0.5,
+            "speed": 0.82,
+            "gain": 1,
+            "highpass": 80,
+            "lowpass": 8500,
+            "offset": 0.0,
+            "attack": 0.001,
+            "release": 0.14,
+            "reject_tones": []
+          },
+          {
+            "source": "demolition",
+            "start": 2.15,
+            "duration": 0.35,
+            "speed": 1.15,
+            "gain": 0.17,
+            "highpass": 50,
+            "lowpass": 350,
+            "offset": 0.0,
+            "attack": 0.004,
+            "release": 0.14,
+            "reject_tones": []
+          }
+        ],
+        "description": "Recorded firearm crack with a restrained low demolition thump."
+      },
+      "metrics": {
+        "sample_rate": 48000,
+        "channels": 1,
+        "duration": 0.5,
+        "peak_dbfs": -3.3299798996293206,
+        "true_peak_dbfs": -3.2730141949188027,
+        "rms_dbfs": -20.797134372661095,
+        "dc_offset": 9.951693638176052e-06,
+        "clipped_samples": 0,
+        "loop_seam_delta": 2.4901715960368165e-06,
+        "edge_rms_ratio": 0.031840405255670355,
+        "spectral_centroid_hz": 1183.2873468780585
+      },
+      "source_sha256": {
+        "gunshot": "0a18b2ec21818f2105aadfc939302c8a6b28491ba678a1d5706ecd732872b857",
+        "demolition": "295b980f938e6c1140b82fa60eb05c35f8551331d1b1fb58c9b9e87bed3908ac"
+      }
+    },
+    "flak-burst.ogg": {
+      "sha256": "774358843af2e66af6d1a68168b6326242ccf25b8eccf4142d33a7609bdea5bd",
+      "bytes": 14857,
+      "spec": {
+        "duration": 0.95,
+        "loop": false,
+        "target_rms_dbfs": -19.5,
+        "layers": [
+          {
+            "source": "gunshot",
+            "start": 11.656,
+            "duration": 0.45,
+            "speed": 0.86,
+            "gain": 1,
+            "highpass": 100,
+            "lowpass": 7800,
+            "offset": 0,
+            "attack": 0.001,
+            "release": 0.15,
+            "reject_tones": []
+          },
+          {
+            "source": "gunshot",
+            "start": 6.16,
+            "duration": 0.45,
+            "speed": 0.9,
+            "gain": 0.88,
+            "highpass": 100,
+            "lowpass": 7800,
+            "offset": 0.13,
+            "attack": 0.001,
+            "release": 0.15,
+            "reject_tones": []
+          },
+          {
+            "source": "gunshot",
+            "start": 16.22,
+            "duration": 0.45,
+            "speed": 0.84,
+            "gain": 0.94,
+            "highpass": 100,
+            "lowpass": 7800,
+            "offset": 0.27,
+            "attack": 0.001,
+            "release": 0.15,
+            "reject_tones": []
+          },
+          {
+            "source": "gunshot",
+            "start": 20.69,
+            "duration": 0.45,
+            "speed": 0.92,
+            "gain": 0.82,
+            "highpass": 100,
+            "lowpass": 7800,
+            "offset": 0.41,
+            "attack": 0.001,
+            "release": 0.15,
+            "reject_tones": []
+          }
+        ],
+        "description": "Four different recorded shots with small timing and pitch differences."
+      },
+      "metrics": {
+        "sample_rate": 48000,
+        "channels": 1,
+        "duration": 0.95,
+        "peak_dbfs": -3.517624645458128,
+        "true_peak_dbfs": -3.3724414962961413,
+        "rms_dbfs": -19.55935354981079,
+        "dc_offset": 3.6992034963348915e-06,
+        "clipped_samples": 0,
+        "loop_seam_delta": 3.635682787717087e-06,
+        "edge_rms_ratio": 0.00560024116712632,
+        "spectral_centroid_hz": 1225.0574722480567
+      },
+      "source_sha256": {
+        "gunshot": "0a18b2ec21818f2105aadfc939302c8a6b28491ba678a1d5706ecd732872b857"
+      }
+    },
+    "drone-impact.ogg": {
+      "sha256": "dd116bf5ce074cea54c887c126a87dc4cd2c5c9842df3da362d276d41f925b6b",
+      "bytes": 21671,
+      "spec": {
+        "duration": 1.8,
+        "loop": false,
+        "target_rms_dbfs": -18.5,
+        "layers": [
+          {
+            "source": "demolition",
+            "start": 2.145,
+            "duration": 1.8,
+            "speed": 1.15,
+            "gain": 1,
+            "highpass": 60,
+            "lowpass": 6500,
+            "offset": 0.0,
+            "attack": 0.004,
+            "release": 0.14,
+            "reject_tones": []
+          },
+          {
+            "source": "metal-crash",
+            "start": 0.49,
+            "duration": 0.78,
+            "speed": 1.1,
+            "gain": 0.17,
+            "highpass": 600,
+            "lowpass": 7000,
+            "offset": 0.09,
+            "attack": 0.004,
+            "release": 0.14,
+            "reject_tones": []
+          }
+        ],
+        "description": "Compact real blast and short metal-debris tail."
+      },
+      "metrics": {
+        "sample_rate": 48000,
+        "channels": 1,
+        "duration": 1.8,
+        "peak_dbfs": -4.745117147146867,
+        "true_peak_dbfs": -4.68429621354418,
+        "rms_dbfs": -18.673973570937225,
+        "dc_offset": -7.385337453969006e-06,
+        "clipped_samples": 0,
+        "loop_seam_delta": 2.8597351047210395e-05,
+        "edge_rms_ratio": 0.43070903447269304,
+        "spectral_centroid_hz": 1243.1596580676678
+      },
+      "source_sha256": {
+        "demolition": "295b980f938e6c1140b82fa60eb05c35f8551331d1b1fb58c9b9e87bed3908ac",
+        "metal-crash": "bca4ff755425d5201a69b8562020e059251af19426906a56870a64105da2e254"
+      }
+    },
+    "heavy-impact.ogg": {
+      "sha256": "320b7cad056cd4d4f0a320241865bc1a233131b2854049a54e16afb0a82d6fa1",
+      "bytes": 27734,
+      "spec": {
+        "duration": 2.8,
+        "loop": false,
+        "target_rms_dbfs": -18,
+        "layers": [
+          {
+            "source": "demolition",
+            "start": 2.145,
+            "duration": 2.8,
+            "speed": 0.82,
+            "gain": 1,
+            "highpass": 35,
+            "lowpass": 4600,
+            "offset": 0.0,
+            "attack": 0.004,
+            "release": 0.14,
+            "reject_tones": []
+          },
+          {
+            "source": "metal-crash",
+            "start": 1.22,
+            "duration": 1.4,
+            "speed": 0.75,
+            "gain": 0.2,
+            "highpass": 300,
+            "lowpass": 4300,
+            "offset": 0.18,
+            "attack": 0.004,
+            "release": 0.14,
+            "reject_tones": []
+          }
+        ],
+        "description": "Slower heavy detonation and delayed metal collapse."
+      },
+      "metrics": {
+        "sample_rate": 48000,
+        "channels": 1,
+        "duration": 2.8,
+        "peak_dbfs": -4.006526201393673,
+        "true_peak_dbfs": -3.9812371484182014,
+        "rms_dbfs": -18.133726236921063,
+        "dc_offset": 2.6048012051798418e-05,
+        "clipped_samples": 0,
+        "loop_seam_delta": 1.0302235523340642e-05,
+        "edge_rms_ratio": 0.03732171895381072,
+        "spectral_centroid_hz": 871.3749620093341
+      },
+      "source_sha256": {
+        "demolition": "295b980f938e6c1140b82fa60eb05c35f8551331d1b1fb58c9b9e87bed3908ac",
+        "metal-crash": "bca4ff755425d5201a69b8562020e059251af19426906a56870a64105da2e254"
+      }
+    },
+    "wreck-impact.ogg": {
+      "sha256": "284bac8af257e1cc0adb9400df08a10084f6fe0123048b031b2f75189d029b80",
+      "bytes": 16882,
+      "spec": {
+        "duration": 1.25,
+        "loop": false,
+        "target_rms_dbfs": -22,
+        "layers": [
+          {
+            "source": "metal-crash",
+            "start": 0.49,
+            "duration": 1.25,
+            "speed": 0.86,
+            "gain": 1,
+            "highpass": 120,
+            "lowpass": 6200,
+            "offset": 0.0,
+            "attack": 0.004,
+            "release": 0.14,
+            "reject_tones": []
+          }
+        ],
+        "description": "Metal crash and scrape without an explosive bass layer."
+      },
+      "metrics": {
+        "sample_rate": 48000,
+        "channels": 1,
+        "duration": 1.25,
+        "peak_dbfs": -7.609399219998549,
+        "true_peak_dbfs": -7.600746173082485,
+        "rms_dbfs": -22.179276049707273,
+        "dc_offset": 5.608119918461677e-06,
+        "clipped_samples": 0,
+        "loop_seam_delta": 6.948337158974027e-06,
+        "edge_rms_ratio": 0.09791535190822762,
+        "spectral_centroid_hz": 1388.4474784587073
+      },
+      "source_sha256": {
+        "metal-crash": "bca4ff755425d5201a69b8562020e059251af19426906a56870a64105da2e254"
+      }
+    },
+    "fuel-explosion.ogg": {
+      "sha256": "38ab2914b9147ce646d710ea7e1b27bfd6484e48e0f5ee2c822d3f896473853b",
+      "bytes": 24262,
+      "spec": {
+        "duration": 2.5,
+        "loop": false,
+        "target_rms_dbfs": -19,
+        "layers": [
+          {
+            "source": "demolition",
+            "start": 2.145,
+            "duration": 1.6,
+            "speed": 0.95,
+            "gain": 0.8,
+            "highpass": 50,
+            "lowpass": 5200,
+            "offset": 0.0,
+            "attack": 0.004,
+            "release": 0.14,
+            "reject_tones": []
+          },
+          {
+            "source": "rocket",
+            "start": 0.55,
+            "duration": 2.15,
+            "speed": 0.82,
+            "gain": 0.32,
+            "highpass": 220,
+            "lowpass": 4100,
+            "offset": 0.18,
+            "attack": 0.07,
+            "release": 0.65,
+            "reject_tones": []
+          }
+        ],
+        "description": "Blast followed by a broad recorded combustion roar."
+      },
+      "metrics": {
+        "sample_rate": 48000,
+        "channels": 1,
+        "duration": 2.5,
+        "peak_dbfs": -5.060650880717127,
+        "true_peak_dbfs": -5.054133920232003,
+        "rms_dbfs": -19.146136420137466,
+        "dc_offset": -7.516588831639432e-06,
+        "clipped_samples": 0,
+        "loop_seam_delta": 2.0936298824381083e-05,
+        "edge_rms_ratio": 0.03726699324794605,
+        "spectral_centroid_hz": 972.7128947889175
+      },
+      "source_sha256": {
+        "demolition": "295b980f938e6c1140b82fa60eb05c35f8551331d1b1fb58c9b9e87bed3908ac",
+        "rocket": "6853bef08fe98fd3682bf0622f23693b2fb05dd8a02a2c69804654bce8b49d16"
+      }
+    },
+    "warhead-explosion.ogg": {
+      "sha256": "8a39f6d1ebd46523a5286e0a196978f0bd9864e70710f2cc36871df2d4b8ef2f",
+      "bytes": 23601,
+      "spec": {
+        "duration": 2.3,
+        "loop": false,
+        "target_rms_dbfs": -18,
+        "layers": [
+          {
+            "source": "demolition",
+            "start": 2.145,
+            "duration": 2.3,
+            "speed": 0.72,
+            "gain": 1,
+            "highpass": 30,
+            "lowpass": 6500,
+            "offset": 0.0,
+            "attack": 0.004,
+            "release": 0.14,
+            "reject_tones": []
+          },
+          {
+            "source": "gunshot",
+            "start": 0.496,
+            "duration": 0.3,
+            "speed": 0.8,
+            "gain": 0.12,
+            "highpass": 950,
+            "lowpass": 8000,
+            "offset": 0.0,
+            "attack": 0.004,
+            "release": 0.14,
+            "reject_tones": []
+          }
+        ],
+        "description": "Deep detonation with a sharp initial pressure crack."
+      },
+      "metrics": {
+        "sample_rate": 48000,
+        "channels": 1,
+        "duration": 2.3,
+        "peak_dbfs": -4.843246982631496,
+        "true_peak_dbfs": -4.772954398173238,
+        "rms_dbfs": -18.15855671715548,
+        "dc_offset": -2.595603617996106e-05,
+        "clipped_samples": 0,
+        "loop_seam_delta": 1.2006226825178601e-05,
+        "edge_rms_ratio": 0.02953538916760576,
+        "spectral_centroid_hz": 1134.9695441108747
+      },
+      "source_sha256": {
+        "demolition": "295b980f938e6c1140b82fa60eb05c35f8551331d1b1fb58c9b9e87bed3908ac",
+        "gunshot": "0a18b2ec21818f2105aadfc939302c8a6b28491ba678a1d5706ecd732872b857"
+      }
+    },
+    "ballistic-launch.ogg": {
+      "sha256": "e253e67c1bf4cc73fe2f028021122154719827b3567fc6e6cb4894c8c16d4a2d",
+      "bytes": 26086,
+      "spec": {
+        "duration": 2.5,
+        "loop": false,
+        "target_rms_dbfs": -18.5,
+        "layers": [
+          {
+            "source": "rocket",
+            "start": 19.17,
+            "duration": 2.5,
+            "speed": 0.82,
+            "gain": 1,
+            "highpass": 35,
+            "lowpass": 6300,
+            "offset": 0.0,
+            "attack": 0.01,
+            "release": 0.35,
+            "reject_tones": []
+          }
+        ],
+        "description": "Recorded rocket ignition and sustained exhaust, modestly pitched down."
+      },
+      "metrics": {
+        "sample_rate": 48000,
+        "channels": 1,
+        "duration": 2.5,
+        "peak_dbfs": -3.7264094731267687,
+        "true_peak_dbfs": -3.7208820980957,
+        "rms_dbfs": -18.4983595917707,
+        "dc_offset": 9.795238424967803e-05,
+        "clipped_samples": 0,
+        "loop_seam_delta": 4.934020125801908e-07,
+        "edge_rms_ratio": 0.024699063542680585,
+        "spectral_centroid_hz": 265.12121122568146
+      },
+      "source_sha256": {
+        "rocket": "6853bef08fe98fd3682bf0622f23693b2fb05dd8a02a2c69804654bce8b49d16"
+      }
+    },
+    "ballistic-flight-loop.ogg": {
+      "sha256": "dd673b5ce90705f0b6d69cab067cd885eb73632f3fe2448bd24cd4b7fde7b0f0",
+      "bytes": 36491,
+      "spec": {
+        "duration": 3.2,
+        "loop": true,
+        "target_rms_dbfs": -23,
+        "layers": [
+          {
+            "source": "rocket",
+            "start": 20.0,
+            "duration": 3.8,
+            "speed": 1,
+            "gain": 1,
+            "highpass": 170,
+            "lowpass": 5100,
+            "offset": 0.0,
+            "attack": 0.004,
+            "release": 0.14,
+            "reject_tones": []
+          }
+        ],
+        "description": "Recorded rocket exhaust with a continuous broad-band flight rush."
+      },
+      "metrics": {
+        "sample_rate": 48000,
+        "channels": 1,
+        "duration": 3.2,
+        "peak_dbfs": -10.09375594796114,
+        "true_peak_dbfs": -10.042014962592848,
+        "rms_dbfs": -23.04134551698101,
+        "dc_offset": 7.413596111523664e-06,
+        "clipped_samples": 0,
+        "loop_seam_delta": 0.0018308833241462708,
+        "edge_rms_ratio": 1.2280722997318234,
+        "spectral_centroid_hz": 595.7675266096411
+      },
+      "source_sha256": {
+        "rocket": "6853bef08fe98fd3682bf0622f23693b2fb05dd8a02a2c69804654bce8b49d16"
+      }
+    },
+    "ballistic-impact.ogg": {
+      "sha256": "5029fcd9a54bbc71f0695cc3293fcada5240ae676b940bba47ce9457a92e93c7",
+      "bytes": 35549,
+      "spec": {
+        "duration": 4.0,
+        "loop": false,
+        "target_rms_dbfs": -17.5,
+        "layers": [
+          {
+            "source": "demolition",
+            "start": 2.145,
+            "duration": 4,
+            "speed": 0.61,
+            "gain": 1,
+            "highpass": 28,
+            "lowpass": 4200,
+            "offset": 0.0,
+            "attack": 0.004,
+            "release": 0.14,
+            "reject_tones": []
+          },
+          {
+            "source": "metal-crash",
+            "start": 0.49,
+            "duration": 2.4,
+            "speed": 0.64,
+            "gain": 0.23,
+            "highpass": 200,
+            "lowpass": 5200,
+            "offset": 0.32,
+            "attack": 0.004,
+            "release": 0.14,
+            "reject_tones": []
+          },
+          {
+            "source": "demolition",
+            "start": 3,
+            "duration": 2.8,
+            "speed": 0.76,
+            "gain": 0.16,
+            "highpass": 40,
+            "lowpass": 900,
+            "offset": 1.0,
+            "attack": 0.004,
+            "release": 0.14,
+            "reject_tones": []
+          }
+        ],
+        "description": "Largest low detonation, delayed debris, and long pressure decay."
+      },
+      "metrics": {
+        "sample_rate": 48000,
+        "channels": 1,
+        "duration": 4.0,
+        "peak_dbfs": -3.4221135840056958,
+        "true_peak_dbfs": -3.3564247386646056,
+        "rms_dbfs": -17.621648785397998,
+        "dc_offset": -4.426529147559144e-06,
+        "clipped_samples": 0,
+        "loop_seam_delta": 2.1959201603749534e-05,
+        "edge_rms_ratio": 0.02678027977383131,
+        "spectral_centroid_hz": 765.5584378554788
+      },
+      "source_sha256": {
+        "demolition": "295b980f938e6c1140b82fa60eb05c35f8551331d1b1fb58c9b9e87bed3908ac",
+        "metal-crash": "bca4ff755425d5201a69b8562020e059251af19426906a56870a64105da2e254"
+      }
+    },
+    "intercept-launch.ogg": {
+      "sha256": "52d6df903b2a579f554cbe6149872c8f87e61e40247a643447cee2dc9674ce1d",
+      "bytes": 15851,
+      "spec": {
+        "duration": 1.2,
+        "loop": false,
+        "target_rms_dbfs": -20,
+        "layers": [
+          {
+            "source": "rocket",
+            "start": 7.22,
+            "duration": 1.2,
+            "speed": 1.28,
+            "gain": 1,
+            "highpass": 180,
+            "lowpass": 8500,
+            "offset": 0.0,
+            "attack": 0.003,
+            "release": 0.25,
+            "reject_tones": []
+          }
+        ],
+        "description": "Tight higher-pitched rocket ignition with a short exhaust tail."
+      },
+      "metrics": {
+        "sample_rate": 48000,
+        "channels": 1,
+        "duration": 1.2,
+        "peak_dbfs": -4.407427806903499,
+        "true_peak_dbfs": -4.387400761741632,
+        "rms_dbfs": -20.11684994719294,
+        "dc_offset": -1.00415343571792e-05,
+        "clipped_samples": 0,
+        "loop_seam_delta": 1.2928372257192677e-06,
+        "edge_rms_ratio": 0.0007092315059765274,
+        "spectral_centroid_hz": 928.5213658849876
+      },
+      "source_sha256": {
+        "rocket": "6853bef08fe98fd3682bf0622f23693b2fb05dd8a02a2c69804654bce8b49d16"
+      }
+    },
+    "intercept-burst.ogg": {
+      "sha256": "1de9f4bbabdf7b65ca3e51333e0708aa1cc2f02d5f21b75bdb9ccf10b352f089",
+      "bytes": 14390,
+      "spec": {
+        "duration": 1.0,
+        "loop": false,
+        "target_rms_dbfs": -20,
+        "layers": [
+          {
+            "source": "demolition",
+            "start": 2.145,
+            "duration": 1,
+            "speed": 1.52,
+            "gain": 1,
+            "highpass": 190,
+            "lowpass": 8000,
+            "offset": 0.0,
+            "attack": 0.004,
+            "release": 0.14,
+            "reject_tones": []
+          }
+        ],
+        "description": "Fast bright airburst retaining the recorded explosion's crackle."
+      },
+      "metrics": {
+        "sample_rate": 48000,
+        "channels": 1,
+        "duration": 1.0,
+        "peak_dbfs": -6.460498589200386,
+        "true_peak_dbfs": -6.3230282504269875,
+        "rms_dbfs": -20.219401312092167,
+        "dc_offset": 2.2406123235908145e-06,
+        "clipped_samples": 0,
+        "loop_seam_delta": 3.7542234395004925e-05,
+        "edge_rms_ratio": 0.7481190609127103,
+        "spectral_centroid_hz": 1839.9796874486915
+      },
+      "source_sha256": {
+        "demolition": "295b980f938e6c1140b82fa60eb05c35f8551331d1b1fb58c9b9e87bed3908ac"
+      }
+    },
+    "radar-hum-loop.ogg": {
+      "sha256": "9d7e978202740bb6da4b2f813a99c39ac402bf8c104f418db24ac66716605dde",
+      "bytes": 27808,
+      "spec": {
+        "duration": 4.0,
+        "loop": true,
+        "target_rms_dbfs": -29,
+        "layers": [
+          {
+            "source": "compressor",
+            "start": 3.2,
+            "duration": 4.6,
+            "speed": 1.08,
+            "gain": 1,
+            "highpass": 90,
+            "lowpass": 1500,
+            "offset": 0.0,
+            "attack": 0.004,
+            "release": 0.14,
+            "reject_tones": [
+              176.6,
+              353.2,
+              706.4,
+              1059.6
+            ]
+          }
+        ],
+        "description": "Quiet radar drive texture with persistent compressor whine removed."
+      },
+      "metrics": {
+        "sample_rate": 48000,
+        "channels": 1,
+        "duration": 4.0,
+        "peak_dbfs": -18.086387867889645,
+        "true_peak_dbfs": -18.080860492858573,
+        "rms_dbfs": -28.971678769735007,
+        "dc_offset": 2.367707797048979e-06,
+        "clipped_samples": 0,
+        "loop_seam_delta": 0.003116366919130087,
+        "edge_rms_ratio": 1.220549192341527,
+        "spectral_centroid_hz": 252.2660994337019
+      },
+      "source_sha256": {
+        "compressor": "5c89cd78d5b2fb4ae0c21b40a7d85d5533e463bebf3844cdff9b65da44e2125e"
+      }
+    },
+    "radar-ping.ogg": {
+      "sha256": "f7c8801a2f159841c82721581fc12003f9adc311eb4f74574fdbb9cd86ae84fe",
+      "bytes": 6441,
+      "spec": {
+        "duration": 0.65,
+        "loop": false,
+        "target_rms_dbfs": -25,
+        "layers": [
+          {
+            "source": "alarm",
+            "start": 0.23,
+            "duration": 0.11,
+            "speed": 0.76,
+            "gain": 1,
+            "highpass": 500,
+            "lowpass": 3000,
+            "offset": 0.0,
+            "attack": 0.006,
+            "release": 0.04,
+            "reject_tones": []
+          },
+          {
+            "source": "alarm",
+            "start": 0.23,
+            "duration": 0.11,
+            "speed": 0.76,
+            "gain": 0.17,
+            "highpass": 500,
+            "lowpass": 2800,
+            "offset": 0.16,
+            "attack": 0.006,
+            "release": 0.06,
+            "reject_tones": []
+          },
+          {
+            "source": "alarm",
+            "start": 0.23,
+            "duration": 0.11,
+            "speed": 0.76,
+            "gain": 0.06,
+            "highpass": 500,
+            "lowpass": 2400,
+            "offset": 0.29,
+            "attack": 0.006,
+            "release": 0.06,
+            "reject_tones": []
+          }
+        ],
+        "description": "A recorded buzzer pulse with two quiet filtered echoes."
+      },
+      "metrics": {
+        "sample_rate": 48000,
+        "channels": 1,
+        "duration": 0.65,
+        "peak_dbfs": -8.264899271574503,
+        "true_peak_dbfs": -8.248717436020229,
+        "rms_dbfs": -24.952695334927476,
+        "dc_offset": 8.19287483767732e-09,
+        "clipped_samples": 0,
+        "loop_seam_delta": 2.0043999029439874e-05,
+        "edge_rms_ratio": 0.07934389278348646,
+        "spectral_centroid_hz": 1637.292860492509
+      },
+      "source_sha256": {
+        "alarm": "381276f4ebe9e0f599e01688b8642b4f815bbf4f9ba77413e2313cebb73538d8"
+      }
+    },
+    "airfield-machinery-loop.ogg": {
+      "sha256": "a90ddd8744062e784709f804df1c3dfb1184d90af60739387f2c8fa9c630e021",
+      "bytes": 49464,
+      "spec": {
+        "duration": 6.0,
+        "loop": true,
+        "target_rms_dbfs": -27,
+        "layers": [
+          {
+            "source": "compressor",
+            "start": 1.4,
+            "duration": 6.6,
+            "speed": 0.88,
+            "gain": 1,
+            "highpass": 50,
+            "lowpass": 2800,
+            "offset": 0.0,
+            "attack": 0.004,
+            "release": 0.14,
+            "reject_tones": [
+              176.6,
+              353.2,
+              706.4,
+              1059.6
+            ]
+          }
+        ],
+        "description": "Recorded mechanical texture with sustained compressor tones removed."
+      },
+      "metrics": {
+        "sample_rate": 48000,
+        "channels": 1,
+        "duration": 6.0,
+        "peak_dbfs": -14.742262058519774,
+        "true_peak_dbfs": -14.73666159637147,
+        "rms_dbfs": -27.03178751442094,
+        "dc_offset": 7.991387917456905e-06,
+        "clipped_samples": 0,
+        "loop_seam_delta": 0.0010846778750419617,
+        "edge_rms_ratio": 1.0071194628742295,
+        "spectral_centroid_hz": 594.3222483095043
+      },
+      "source_sha256": {
+        "compressor": "5c89cd78d5b2fb4ae0c21b40a7d85d5533e463bebf3844cdff9b65da44e2125e"
+      }
+    },
+    "ballistic-site-machinery-loop.ogg": {
+      "sha256": "8312d2cd5a9205db3913ddd685fe0983628e66724c28869e3dae917479db3526",
+      "bytes": 37233,
+      "spec": {
+        "duration": 6.0,
+        "loop": true,
+        "target_rms_dbfs": -27.5,
+        "layers": [
+          {
+            "source": "compressor",
+            "start": 5,
+            "duration": 6.6,
+            "speed": 0.64,
+            "gain": 1,
+            "highpass": 35,
+            "lowpass": 1500,
+            "offset": 0.0,
+            "attack": 0.004,
+            "release": 0.14,
+            "reject_tones": [
+              176.6,
+              353.2,
+              706.4,
+              1059.6
+            ]
+          },
+          {
+            "source": "metal-crash",
+            "start": 2.15,
+            "duration": 0.6,
+            "speed": 0.65,
+            "gain": 0.015,
+            "highpass": 140,
+            "lowpass": 1800,
+            "offset": 2.1,
+            "attack": 0.18,
+            "release": 0.3,
+            "reject_tones": []
+          }
+        ],
+        "description": "Slower machinery with the sustained whine removed and subtle mechanism vibration retained."
+      },
+      "metrics": {
+        "sample_rate": 48000,
+        "channels": 1,
+        "duration": 6.0,
+        "peak_dbfs": -15.55865603747293,
+        "true_peak_dbfs": -15.553128662441862,
+        "rms_dbfs": -27.527599344010273,
+        "dc_offset": 3.0062291614790915e-06,
+        "clipped_samples": 0,
+        "loop_seam_delta": 0.001179552637040615,
+        "edge_rms_ratio": 1.0585818796589,
+        "spectral_centroid_hz": 238.55150925222614
+      },
+      "source_sha256": {
+        "compressor": "5c89cd78d5b2fb4ae0c21b40a7d85d5533e463bebf3844cdff9b65da44e2125e",
+        "metal-crash": "bca4ff755425d5201a69b8562020e059251af19426906a56870a64105da2e254"
+      }
+    },
+    "air-raid-siren.ogg": {
+      "sha256": "a2a5d8f5eaf98445940d7ed8da3e229c32a7df182040661a45440973692d007e",
+      "bytes": 49832,
+      "spec": {
+        "duration": 6.0,
+        "loop": true,
+        "target_rms_dbfs": -21,
+        "layers": [
+          {
+            "source": "siren",
+            "start": 21.15,
+            "duration": 6.6,
+            "speed": 1.17,
+            "gain": 1,
+            "highpass": 170,
+            "lowpass": 3300,
+            "offset": 0.0,
+            "attack": 0.004,
+            "release": 0.14,
+            "reject_tones": []
+          }
+        ],
+        "description": "Real civil-defense siren descending and rising through its mechanical cycle."
+      },
+      "metrics": {
+        "sample_rate": 48000,
+        "channels": 1,
+        "duration": 6.0,
+        "peak_dbfs": -8.561970565319196,
+        "true_peak_dbfs": -8.556443190288126,
+        "rms_dbfs": -20.92456172604828,
+        "dc_offset": 2.2470157994705332e-06,
+        "clipped_samples": 0,
+        "loop_seam_delta": 0.0005851909518241882,
+        "edge_rms_ratio": 1.689102924188312,
+        "spectral_centroid_hz": 502.0918733944485
+      },
+      "source_sha256": {
+        "siren": "0ad8e5bef34c351fb69638fd8dca4090f5ade670098a2007419e552e2e72001c"
+      }
+    },
+    "ballistic-warning.ogg": {
+      "sha256": "532f71cc20f46344216c967c27962e9528c03f8e2565ed49ec6c14eb2f16bb02",
+      "bytes": 17265,
+      "spec": {
+        "duration": 4.5,
+        "loop": true,
+        "target_rms_dbfs": -20.5,
+        "layers": [
+          {
+            "source": "alarm",
+            "start": 0.23,
+            "duration": 0.14,
+            "speed": 0.64,
+            "gain": 1,
+            "highpass": 450,
+            "lowpass": 3800,
+            "offset": 0,
+            "attack": 0.005,
+            "release": 0.025,
+            "reject_tones": []
+          },
+          {
+            "source": "alarm",
+            "start": 0.23,
+            "duration": 0.14,
+            "speed": 0.64,
+            "gain": 1,
+            "highpass": 450,
+            "lowpass": 3800,
+            "offset": 0.23,
+            "attack": 0.005,
+            "release": 0.025,
+            "reject_tones": []
+          },
+          {
+            "source": "alarm",
+            "start": 0.23,
+            "duration": 0.14,
+            "speed": 0.83,
+            "gain": 1,
+            "highpass": 450,
+            "lowpass": 3800,
+            "offset": 0.46,
+            "attack": 0.005,
+            "release": 0.025,
+            "reject_tones": []
+          },
+          {
+            "source": "alarm",
+            "start": 0.23,
+            "duration": 0.14,
+            "speed": 0.64,
+            "gain": 1,
+            "highpass": 450,
+            "lowpass": 3800,
+            "offset": 1.5,
+            "attack": 0.005,
+            "release": 0.025,
+            "reject_tones": []
+          },
+          {
+            "source": "alarm",
+            "start": 0.23,
+            "duration": 0.14,
+            "speed": 0.64,
+            "gain": 1,
+            "highpass": 450,
+            "lowpass": 3800,
+            "offset": 1.73,
+            "attack": 0.005,
+            "release": 0.025,
+            "reject_tones": []
+          },
+          {
+            "source": "alarm",
+            "start": 0.23,
+            "duration": 0.14,
+            "speed": 0.83,
+            "gain": 1,
+            "highpass": 450,
+            "lowpass": 3800,
+            "offset": 1.96,
+            "attack": 0.005,
+            "release": 0.025,
+            "reject_tones": []
+          },
+          {
+            "source": "alarm",
+            "start": 0.23,
+            "duration": 0.14,
+            "speed": 0.64,
+            "gain": 1,
+            "highpass": 450,
+            "lowpass": 3800,
+            "offset": 3,
+            "attack": 0.005,
+            "release": 0.025,
+            "reject_tones": []
+          },
+          {
+            "source": "alarm",
+            "start": 0.23,
+            "duration": 0.14,
+            "speed": 0.64,
+            "gain": 1,
+            "highpass": 450,
+            "lowpass": 3800,
+            "offset": 3.23,
+            "attack": 0.005,
+            "release": 0.025,
+            "reject_tones": []
+          },
+          {
+            "source": "alarm",
+            "start": 0.23,
+            "duration": 0.14,
+            "speed": 0.83,
+            "gain": 1,
+            "highpass": 450,
+            "lowpass": 3800,
+            "offset": 3.46,
+            "attack": 0.005,
+            "release": 0.025,
+            "reject_tones": []
+          },
+          {
+            "source": "alarm",
+            "start": 0.23,
+            "duration": 0.14,
+            "speed": 0.64,
+            "gain": 1,
+            "highpass": 450,
+            "lowpass": 3800,
+            "offset": 4.5,
+            "attack": 0.005,
+            "release": 0.025,
+            "reject_tones": []
+          },
+          {
+            "source": "alarm",
+            "start": 0.23,
+            "duration": 0.14,
+            "speed": 0.64,
+            "gain": 1,
+            "highpass": 450,
+            "lowpass": 3800,
+            "offset": 4.73,
+            "attack": 0.005,
+            "release": 0.025,
+            "reject_tones": []
+          },
+          {
+            "source": "alarm",
+            "start": 0.23,
+            "duration": 0.14,
+            "speed": 0.83,
+            "gain": 1,
+            "highpass": 450,
+            "lowpass": 3800,
+            "offset": 4.96,
+            "attack": 0.005,
+            "release": 0.025,
+            "reject_tones": []
+          }
+        ],
+        "description": "Three groups of three recorded buzzer pulses, with a raised third pulse."
+      },
+      "metrics": {
+        "sample_rate": 48000,
+        "channels": 1,
+        "duration": 4.5,
+        "peak_dbfs": -5.2616446147783735,
+        "true_peak_dbfs": -5.203178240164597,
+        "rms_dbfs": -20.45212460355511,
+        "dc_offset": -7.287384251286302e-08,
+        "clipped_samples": 0,
+        "loop_seam_delta": 0.0003286783758085221,
+        "edge_rms_ratio": 0.079932930366697,
+        "spectral_centroid_hz": 1684.555818967208
+      },
+      "source_sha256": {
+        "alarm": "381276f4ebe9e0f599e01688b8642b4f815bbf4f9ba77413e2313cebb73538d8"
+      }
+    }
+  }
+}

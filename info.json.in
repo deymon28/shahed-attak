@@ -1,0 +1,11 @@
+{
+  "name": "shahed-attack",
+  "version": "0.6.7",
+  "title": "Shahed Attack: Air War",
+  "author": "dimag",
+  "factorio_version": "2.0",
+  "dependencies": [
+    "base >= 2.0.77"
+  ],
+  "description": "Physical air raids from hostile bases, early warning, animated air defense, and fast probabilistic missile interception."
+}

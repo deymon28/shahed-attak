@@ -1,0 +1,23 @@
+# Build and release outputs
+/build/
+/dist/
+/info.json
+
+# Python and test caches
+__pycache__/
+.pytest_cache/
+*.pyc
+
+# Renderer caches and editor backups
+optix7cache.db
+*.blend1
+
+# Large development-only art sources; runtime sprites live in graphics/entity and graphics/icons
+/graphics/3d/
+/graphics/renders/
+/graphics/imported/
+/graphics/hybrid/
+/graphics/source/
+
+# Downloaded audio sources (reproducible with tools/fetch_audio_sources.py)
+/assets/audio-source/*.mp3

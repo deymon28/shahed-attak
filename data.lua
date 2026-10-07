@@ -1,0 +1,8 @@
+require("prototypes.categories")
+require("prototypes.sounds")
+require("prototypes.signals")
+require("prototypes.visuals")
+require("prototypes.effects")
+require("prototypes.enemies")
+require("prototypes.defense")
+require("prototypes.technology")
