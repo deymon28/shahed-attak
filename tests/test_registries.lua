@@ -62,6 +62,32 @@ h.check(current.sources.airfields[near.unit_number] == nil and infrastructure.co
   "destroyed source unregistered")
 h.check(beyond.valid, "sources beyond range stay registered")
 
+-- Merged forces: the absorbed force's buildings are rescanned for the
+-- destination force and its planning state carries over.
+local blue = h.force(4, "blue")
+game.forces.blue, game.forces[4] = blue, blue
+local blue_building = h.entity({type = "lab", name = "lab", force = blue})
+targeting.register(blue_building)
+current.intelligence[4] = 2
+current.ballistic_readiness[4] = 100
+current.active_missiles[99] = {id = 99, force_index = 4}
+h.check(targeting.count(1, 4) == 1, "second force registered")
+blue_building.force = h.player_force
+game.forces.blue, game.forces[4] = nil, nil
+state.merge_forces(4, 1)
+targeting.on_forces_merged(4)
+h.check(targeting.count(1, 4) == 0, "absorbed force list dropped")
+for _, record in pairs(state.root().target_registrations) do
+  h.check(record.force_index ~= 4, "absorbed force registrations dropped")
+end
+h.check(state.root().scan_queue[1] ~= nil, "surface rescan queued")
+targeting.register(blue_building)
+h.check(state.root().targets[1][1].by_unit[blue_building.unit_number] ~= nil, "building listed for the destination force")
+h.check(current.intelligence[1] == 2 and current.intelligence[4] == nil, "intelligence carried over")
+h.check(current.ballistic_readiness[1] == 100 and current.ballistic_readiness[4] == nil, "readiness carried over")
+h.check(current.active_missiles[99].force_index == 1, "missiles retargeted to the destination force")
+current.active_missiles[99] = nil
+
 -- Deleting a surface forgets everything that belonged to it.
 state.root().scan_queue[1] = {chunks = {}, cursor = 1}
 state.root().audio_cooldowns[1] = {x = 1}

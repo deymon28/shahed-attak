@@ -47,7 +47,7 @@ end
 function harness.surface(index, name)
   local surface = {
     index = index or 1, name = name or "nauvis", valid = true, entities = {}, created = {},
-    ticks_per_day = 25000, map_gen_settings = {seed = 1, peaceful_mode = false}
+    ticks_per_day = 25000, peaceful_mode = false, map_gen_settings = {seed = 1, peaceful_mode = false}
   }
   function surface.find_entities_filtered(filter)
     local names, types = as_set(filter.name), as_set(filter.type)

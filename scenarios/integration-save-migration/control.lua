@@ -43,16 +43,22 @@ script.on_init(function()
     surface_index = surface.index,
     target_force_name = "player",
     target_position = target.position,
-    origin_position = {x = 0, y = -300},
+    -- The airfield itself: 0.7+ start raids only at a registered base there.
+    origin_position = {x = 80, y = 80},
     size = 2
   })
   local ballistic = remote.call("shahed_attack", "schedule_event", {
     kind = "ballistic",
+    -- The launch site (0.7.0 needs the hint when called before its on_init).
+    origin_position = {x = -280, y = 0},
     surface_index = surface.index,
     target_force_name = "player",
     target_position = target.position
   })
-  if not raid.ok or not ballistic.ok then fail("could not create active migration threats") end
+  if not raid.ok or not ballistic.ok then
+    fail("could not create active migration threats: raid=" .. tostring(raid.error)
+      .. " ballistic=" .. tostring(ballistic.error))
+  end
   local status = remote.call("shahed_attack", "get_surface_state", surface.index)
   storage.fixture = {
     surface_index = surface.index,
@@ -68,7 +74,9 @@ end)
 
 script.on_configuration_changed(function()
   if current_version() ~= storage.original_version then
-    storage.validate_migration_tick = game.tick + 5
+    -- Validate after the 80-tick launch animation of the fixture missile,
+    -- which hides the launch site's idle overlay while it plays.
+    storage.validate_migration_tick = math.max(game.tick + 5, 120)
   end
 end)
 

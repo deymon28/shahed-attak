@@ -1,4 +1,20 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.7.1
+Date: 2026-10-15
+  Bugfixes:
+    - Missile-defense launchers stayed locked on a target that already had the maximum number of interceptors in flight, leaving the other missiles of a salvo unengaged; spare launchers now turn to the next threat in range.
+    - A grace period shorter than two days had no effect on new games.
+    - The clear command and the clear_threats remote call left queued salvo missiles, which launched afterwards.
+    - Peaceful mode switched on during a game did not stop natural attacks.
+    - The anti-air wagon panel kept showing an engagement or missing ammunition after the drones were gone or the wagon was reloaded.
+    - Remote attacks without a source position failed with no-source when a scenario called them before the mod had initialized, or for bases placed without a build event.
+    - After forces were merged, the absorbed force's buildings were not targeted and its reconnaissance and chemical-science state was lost.
+  Changes:
+    - /shahed-attack stats run from the server console prints the status.
+    - Missiles of one scripted salvo share a salvo id.
+  Optimizations:
+    - Enemy-base placement reads the map seed once per scanned chunk instead of once per biter nest.
+---------------------------------------------------------------------------------------------------
 Version: 0.7.0
 Date: 2026-10-07
   Features:

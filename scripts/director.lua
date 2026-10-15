@@ -243,7 +243,8 @@ director.on_configuration_changed = director.initialize
 function director.update(tick)
   for surface_index, surface_state in pairs(state.root().surfaces) do
     local surface = game.get_surface(surface_index)
-    if state.supported(surface) and not surface.map_gen_settings.peaceful_mode then
+    -- surface.peaceful_mode is the live value (it can be changed during a game).
+    if state.supported(surface) and not surface.peaceful_mode then
       local generator = random.new(surface_state.rng_state)
       local evolution = evolution_of(surface)
       track_readiness(surface, surface_state, tick)
@@ -314,11 +315,12 @@ end
 function director.launch_salvo(surface, surface_state, force, target, generator, size, site)
   if site then
     local class = rules.ballistic_class(director.ballistic_progress(surface))
-    local id = ballistics.launch(surface, force, target, site, generator, {class = class})
+    local salvo_id = state.next_event_id()
+    local id = ballistics.launch(surface, force, target, site, generator, {class = class, salvo_id = salvo_id})
     local launched = id and 1 or 0
     for _ = 2, size do
       queue(surface_state, {tick = game.tick + generator:range_int(60, 240), kind = "ballistic",
-        force_index = force.index, target = target, site = site, class = class})
+        force_index = force.index, target = target, site = site, class = class, salvo_id = salvo_id})
       launched = launched + 1
     end
     return launched, id

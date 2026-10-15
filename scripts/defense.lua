@@ -316,11 +316,22 @@ local function same_target(lock, target)
   return lock.missile_id == target.id and lock.target_drone == target.drone
 end
 
-local function aim_at(surface_state, launcher, target)
+local function lock_key(lock)
+  if lock.target_drone then
+    return lock.target_drone.valid and ("d" .. lock.target_drone.unit_number) or nil
+  end
+  return lock.missile_id and ("m" .. lock.missile_id) or nil
+end
+
+-- target_saturated: the offered target already has the doctrine limit of
+-- interceptors in flight.
+local function aim_at(surface_state, launcher, target, target_saturated, limit)
   local tracking = surface_state.battery_tracking
   local lock = tracking[launcher.unit_number]
   if lock and not same_target(lock, target) then
-    -- Keep the current lock while its target remains alive and in range.
+    -- Keep the current lock while its target remains alive and in range,
+    -- unless that target is saturated and the offered one is not: spare
+    -- launchers then turn to the next threat of a salvo.
     local previous
     if lock.target_drone then
       previous = lock.target_drone.valid and lock.target_drone or nil
@@ -328,7 +339,8 @@ local function aim_at(surface_state, launcher, target)
       local missile = surface_state.active_missiles[lock.missile_id]
       previous = missile and not missile.intercepted and not missile.finished and missile or nil
     end
-    if previous and defense_math.distance(launcher_position(launcher), previous.position) <= defense.launcher_range(launcher) then
+    if previous and defense_math.distance(launcher_position(launcher), previous.position) <= defense.launcher_range(launcher)
+      and (target_saturated or ordnance.engaged(surface_state, lock_key(lock)) < limit) then
       return false
     end
     lock = nil
@@ -370,7 +382,7 @@ local function try_intercept(launcher, target, surface_state)
   if not ready_to_aim then
     release_lock(surface_state, launcher, target)
   end
-  local aimed = ready_to_aim and aim_at(surface_state, launcher, target)
+  local aimed = ready_to_aim and aim_at(surface_state, launcher, target, saturated, limit)
   local next_tick = surface_state.battery_next_shot[launcher.unit_number] or 0
   if aimed and not saturated and tick >= next_tick and consume(launcher, INTERCEPTOR) then
     if not is_wagon(launcher) then
@@ -460,13 +472,19 @@ local function choose_drone(surface_state, launcher, limit)
   local range = defense.launcher_range(launcher)
   local lock = surface_state.battery_tracking[launcher.unit_number]
   local previous = lock and lock.target_drone
+  -- A locked drone that already has enough interceptors in flight is kept
+  -- only while no other drone in range needs one.
+  local keep
   if previous and previous.valid then
     local record = surface_state.active_drones[previous.unit_number]
     if eligible_drone(launcher, record, range) then
-      return previous
+      if ordnance.engaged(surface_state, "d" .. previous.unit_number) < limit then
+        return previous
+      end
+      keep = previous
     end
   end
-  if lock and lock.target_drone then
+  if lock and lock.target_drone and not keep then
     surface_state.battery_tracking[launcher.unit_number] = nil
   end
   local nearest, nearest_distance, nearest_id
@@ -479,7 +497,7 @@ local function choose_drone(surface_state, launcher, limit)
       end
     end
   end
-  return nearest
+  return nearest or keep
 end
 
 -- AA wagons: a gun mount on a rail car, aimed and fired by script.
@@ -610,8 +628,15 @@ function defense.wagon_status(wagon)
   local surface_state = state.get_surface(wagon.surface.index)
   local record = surface_state and surface_state.wagon_state[wagon.unit_number]
   local magazines = item_count(wagon, FLAK_MAGAZINE)
+  local loaded = magazines > 0 or (record and record.flak_rounds or 0) > 0
+  -- Fire control only runs while drones are in the air, so readiness is
+  -- derived from the cargo; only a recent engagement is shown as such.
+  local key = loaded and "ready" or "no-ammo"
+  if record and record.status == "engaging-drone" and game.tick < record.next_shot + 60 then
+    key = "engaging-drone"
+  end
   return {
-    key = record and record.status or (magazines > 0 and "ready" or "no-ammo"),
+    key = key,
     rounds = (record and record.flak_rounds or 0) + magazines * rules.FLAK_MAGAZINE_ROUNDS
   }
 end

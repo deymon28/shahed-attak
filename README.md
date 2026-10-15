@@ -1,4 +1,4 @@
-# Shahed Attack: Air War 0.7.0
+# Shahed Attack: Air War 0.7.1
 
 A Factorio 2.0.77+ mod that adds an aerial enemy faction to Nauvis: reconnaissance drones, Shahed-style strike drones, heavy drones and decoys flying from enemy airfields, and ballistic missiles launched from enemy launch sites. You defend with AA guns, early-warning radar, missile-defense (ABM) batteries and rail AA/ABM wagons. Space Age is not required; the air war takes place on Nauvis only.
 
@@ -13,6 +13,7 @@ The enemy develops with biter evolution, the same way for drones and missiles:
 | 0.5-0.75 | 10-16 aircraft in groups of eight; some attack AA guns, radars and missile-defense launchers | **Medium** missiles, 3-5 per salvo every ~10-15 min; some salvos are timed to arrive with a drone raid |
 | 0.75-1.0 | 16-24 aircraft, plus extra aircraft for every known defense near the target (up to 40) | **Heavy** missiles: accurate, faster, harder to intercept; 4-8 per salvo every ~6-10 min |
 
+- No natural attacks are launched while peaceful mode is on (`game.surfaces.nauvis.peaceful_mode`); admin commands still work.
 - Every attack starts at a real enemy base. Airfields appear near biter nests at least 384 tiles from the map center; ballistic launch sites at least 640 tiles away. Destroying all bases of a type stops attacks of that type; aircraft already in the air continue.
 - Mass raids are split into groups of up to eight. Groups take off 15-45 seconds apart and swing out to approach from different bearings.
 - Decoys look like strike drones on radar and draw fire, but carry no real warhead.
@@ -32,7 +33,7 @@ Ordinary turrets (vanilla and from other mods) do not target drones, and their s
 | Missile-defense wagon | 128 | Missile launcher on a rail car, no power needed; 4 ready canisters, interceptors from its cargo slots |
 | Early-warning radar | 384 / 2048 | Warns about drones / ballistic missiles about 60 seconds before arrival |
 
-**Fire doctrine.** Missile-defense launchers coordinate: no more than two interceptors (configurable) fly toward one target at a time. When an interceptor misses, another launcher fires (shoot-look-shoot). A salvo larger than your ready canisters will get through, so spread launchers and keep them supplied.
+**Fire doctrine.** Missile-defense launchers coordinate: no more than two interceptors (configurable) fly toward one target at a time. Launchers that cannot add to an engaged target turn to the next missile or drone in range. When an interceptor misses, another launcher fires (shoot-look-shoot). A salvo larger than your ready canisters will get through, so spread launchers and keep them supplied.
 
 **Hit probability.** The base interceptor accuracy is 70%. Light missiles are easier to hit (×1.15), heavy missiles harder (×0.8), drones easier (×1.15).
 
@@ -52,7 +53,7 @@ The **Air war statistics** shortcut (or `/shahed-attack stats`) opens a window w
 
 ## Settings
 
-Map settings (per save): raid frequency, raid size, maximum raid size, grace period, drone damage, reconnaissance / decoys / attacks on air defenses / adaptive raids on or off, maximum drones in the air, ballistic strikes on or off, ballistic frequency, earliest ballistic day, start evolution, preparation time after chemical science, maximum salvo, ballistic damage, AA accuracy, interceptor accuracy, interceptors per target and alert delivery.
+Map settings (per save): raid frequency, raid size, maximum raid size, grace period (counted from the moment the mod is added), drone damage, reconnaissance / decoys / attacks on air defenses / adaptive raids on or off, maximum drones in the air, ballistic strikes on or off, ballistic frequency, earliest ballistic day, start evolution, preparation time after chemical science, maximum salvo, ballistic damage, AA accuracy, interceptor accuracy, interceptors per target and alert delivery.
 
 Per player: alert sounds, detailed alerts, defense ranges on the map, radar ranges on the map.
 
@@ -71,7 +72,7 @@ Per player: alert sounds, detailed alerts, defense ranges on the map, radar rang
 /shahed-attack clear
 ```
 
-Attack commands and `clear` need admin rights. Scripted attacks also start from real enemy bases; they fail with `no-source` when none is in range. The `shahed_attack` remote interface provides `schedule_event`, `get_surface_state`, `get_alert_delivery_state`, `set_alert_delivery`, `set_intercept_accuracy`, `set_setting`, `clear_threats`, `start_profiling` and `stop_profiling`.
+Attack commands and `clear` need admin rights; `clear` also cancels queued groups and salvo missiles. Scripted attacks also start from real enemy bases; they fail with `no-source` when none is in range. The `shahed_attack` remote interface provides `schedule_event`, `get_surface_state`, `get_alert_delivery_state`, `set_alert_delivery`, `set_intercept_accuracy`, `set_setting`, `clear_threats`, `start_profiling` and `stop_profiling`.
 
 ## Saves
 

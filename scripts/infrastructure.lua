@@ -37,8 +37,13 @@ local function register_source(entity, source_type)
   }
 end
 
-local function deterministic_roll(surface, position, salt)
-  local seed = surface.map_gen_settings.seed or 1
+-- Reading map_gen_settings builds a large table; callers read the seed once
+-- per batch of spawners.
+local function map_seed(surface)
+  return surface.map_gen_settings.seed or 1
+end
+
+local function deterministic_roll(seed, position, salt)
   local value = math.abs(seed + position.x * 73856093 + position.y * 19349663 + salt * 83492791)
   return (value % 10000) / 10000
 end
@@ -53,9 +58,9 @@ local function decisions(surface_index)
   return root.source_decisions[surface_index]
 end
 
-local function passes(surface, position, rule)
+local function passes(seed, position, rule)
   local distance = math.sqrt(position.x * position.x + position.y * position.y)
-  return distance >= rule.min_distance and deterministic_roll(surface, position, rule.salt) < rule.chance
+  return distance >= rule.min_distance and deterministic_roll(seed, position, rule.salt) < rule.chance
 end
 
 local function place_source(surface, position, rule)
@@ -75,14 +80,14 @@ end
 
 -- Only spawners that win the deterministic roll are remembered, so a
 -- destroyed source never comes back while storage stays small.
-local function inspect_spawner(surface, spawner)
+local function inspect_spawner(surface, spawner, seed)
   if not spawner.valid then
     return
   end
   local remembered = decisions(surface.index)
   local position = spawner.position
   for _, rule in ipairs(PLACEMENT) do
-    if passes(surface, position, rule) then
+    if passes(seed, position, rule) then
       local key = decision_key(position, rule.salt)
       if not remembered[key] then
         remembered[key] = true
@@ -96,9 +101,13 @@ end
 
 local function inspect_area(surface, area)
   local spawners = surface.find_entities_filtered({area = area, type = "unit-spawner", force = "enemy"})
+  if #spawners == 0 then
+    return
+  end
   table.sort(spawners, function(a, b) return a.unit_number < b.unit_number end)
+  local seed = map_seed(surface)
   for _, spawner in ipairs(spawners) do
-    inspect_spawner(surface, spawner)
+    inspect_spawner(surface, spawner, seed)
   end
 end
 
@@ -112,10 +121,11 @@ local function migrate_inspected(root)
   for _, surface in pairs(game.surfaces) do
     if state.supported(surface) then
       local remembered = decisions(surface.index)
+      local seed = map_seed(surface)
       for _, spawner in ipairs(surface.find_entities_filtered({type = "unit-spawner", force = "enemy"})) do
         if legacy[spawner.unit_number] then
           for _, rule in ipairs(PLACEMENT) do
-            if passes(surface, spawner.position, rule) then
+            if passes(seed, spawner.position, rule) then
               remembered[decision_key(spawner.position, rule.salt)] = true
             end
           end
@@ -176,7 +186,7 @@ end
 function infrastructure.on_biter_base_built(event)
   local entity = event.entity
   if entity and entity.valid and entity.type == "unit-spawner" and state.supported(entity.surface) then
-    inspect_spawner(entity.surface, entity)
+    inspect_spawner(entity.surface, entity, map_seed(entity.surface))
   end
 end
 
@@ -257,6 +267,19 @@ function infrastructure.source_near(surface_state, source_type, position, radius
     end
   end
   return best
+end
+
+-- Registers every base of a type on the surface. Remote calls made before
+-- this mod's on_init (or for bases placed without raise_built) would
+-- otherwise find an empty registry.
+function infrastructure.discover(surface, source_type)
+  for name, kind in pairs(SOURCE_NAMES) do
+    if kind == source_type then
+      for _, entity in ipairs(surface.find_entities_filtered({name = name})) do
+        register_source(entity, source_type)
+      end
+    end
+  end
 end
 
 function infrastructure.count(surface_state, source_type)

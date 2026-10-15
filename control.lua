@@ -55,6 +55,13 @@ script.on_event(defines.events.on_force_created, function(event)
   forces.configure_relations(event.force)
 end)
 
+script.on_event(defines.events.on_forces_merged, function(event)
+  local destination = event.destination.index
+  state.merge_forces(event.source_index, destination)
+  targeting.on_forces_merged(event.source_index)
+  range_overlay.on_forces_merged(event.source_index, destination)
+end)
+
 script.on_event(defines.events.on_runtime_mod_setting_changed, range_overlay.on_setting_changed)
 script.on_event({
   defines.events.on_player_created,

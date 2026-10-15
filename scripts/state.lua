@@ -49,7 +49,8 @@ end
 local function ensure_surface_fields(surface, surface_state)
   local ticks_per_day = math.max(surface.ticks_per_day, 1)
   surface_state.created_tick = surface_state.created_tick or game.tick
-  surface_state.next_raid_tick = surface_state.next_raid_tick or (game.tick + 2 * ticks_per_day)
+  -- The first raid waits for the grace period setting (director.initialize).
+  surface_state.next_raid_tick = surface_state.next_raid_tick or surface_state.created_tick
   surface_state.next_ballistic_tick = surface_state.next_ballistic_tick or (game.tick + math.floor(ticks_per_day / 4))
   surface_state.rng_state = surface_state.rng_state
     or ((surface.map_gen_settings.seed or 1) + surface.index * 7919) % 2147483647
@@ -134,6 +135,35 @@ function state.forget_surface(surface_index)
   for _, map_name in ipairs({"target_registrations", "source_registrations", "defense_registrations"}) do
     for registration, record in pairs(root[map_name]) do
       if record.surface_index == surface_index then root[map_name][registration] = nil end
+    end
+  end
+end
+
+-- Carries per-force planning state over to the force that absorbed another.
+function state.merge_forces(source_index, destination_index)
+  for _, current in pairs(state.root().surfaces) do
+    local intelligence = current.intelligence[source_index]
+    if intelligence then
+      current.intelligence[destination_index] = math.max(current.intelligence[destination_index] or 0, intelligence)
+      current.intelligence[source_index] = nil
+    end
+    local readiness = current.ballistic_readiness[source_index]
+    if readiness then
+      current.ballistic_readiness[destination_index] = math.min(current.ballistic_readiness[destination_index] or readiness, readiness)
+      current.ballistic_readiness[source_index] = nil
+    end
+    for _, drone in pairs(current.active_drones) do
+      if drone.target_force_index == source_index then drone.target_force_index = destination_index end
+    end
+    for _, missile in pairs(current.active_missiles) do
+      if missile.force_index == source_index then missile.force_index = destination_index end
+    end
+    for _, shot in pairs(current.projectiles) do
+      if shot.force_index == source_index then shot.force_index = destination_index end
+    end
+    for _, pending in pairs(current.pending_events) do
+      if pending.force_index == source_index then pending.force_index = destination_index end
+      if pending.group and pending.group.force_index == source_index then pending.group.force_index = destination_index end
     end
   end
 end

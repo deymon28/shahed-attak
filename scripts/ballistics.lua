@@ -300,7 +300,7 @@ function ballistics.update(tick)
   end
 end
 
--- Remove every flying missile without effects (admin cleanup).
+-- Remove every flying and queued missile without effects (admin cleanup).
 function ballistics.clear(surface_state)
   local count = 0
   for missile_id, missile in pairs(surface_state.active_missiles) do
@@ -308,6 +308,12 @@ function ballistics.clear(surface_state)
     cleanup(missile)
     surface_state.active_missiles[missile_id] = nil
     count = count + 1
+  end
+  for id, pending in pairs(surface_state.pending_events) do
+    if pending.kind == "ballistic" then
+      surface_state.pending_events[id] = nil
+      count = count + 1
+    end
   end
   return count
 end

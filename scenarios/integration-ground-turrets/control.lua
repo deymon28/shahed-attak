@@ -12,6 +12,11 @@ end
 script.on_init(function()
   game.speed=16
   surface=game.surfaces[1]
+  -- The scenario map seed varies: keep natural biters away from the turrets.
+  surface.peaceful_mode=true
+  surface.request_to_generate_chunks({80,0},6)
+  surface.force_generate_chunk_requests()
+  for _,entity in ipairs(surface.find_entities_filtered({area={{-64,-64},{224,64}},force="enemy"})) do entity.destroy() end
   flame=surface.create_entity({name="flamethrower-turret",position={0,0},direction=defines.direction.east,force="player"})
   ground=surface.create_entity({name="behemoth-biter",position={18,0},force="enemy"})
 

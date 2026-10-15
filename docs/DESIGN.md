@@ -24,14 +24,15 @@ README.md is the player guide. This document maps the runtime code and records t
 
 ## Invariants
 
-- **Attacks start at real bases.** `raids.spawn_event` and `ballistics.launch` require a valid airfield or launch site; there is no external origin. Scripted events select a registered source near a position.
+- **Attacks start at real bases.** `raids.spawn_event` and `ballistics.launch` require a valid airfield or launch site; there is no external origin. Scripted events select a registered source near a position; when the registry has none in range, the remote call first registers the bases found on the surface (scenario code runs before this mod's on_init).
 - **Nauvis only.** `state.ensure_surface` returns nil for other surfaces; registries ignore entities elsewhere.
 - **Settings through `config`.** Never read `settings.global[name].value` with `and/or` fallbacks: a disabled boolean must stay `false`.
 - **Compact registries.** Target lists are arrays with swap-remove; sources and defenses are maps keyed by unit number. Destroyed entities are removed through `on_object_destroyed` registrations that carry the unit number.
 - **Determinism.** All randomness uses the per-surface generators in storage (`rng_state` for planning, `combat_rng_state` for hits). Iteration that affects outcomes is ordered (sorted projectile and pending-event ids).
-- **Fire doctrine.** `surface_state.engagements[key]` counts interceptors in flight per target (`m<missile id>` or `d<drone unit>`). A shot releases its count when it hits, misses, self-destructs or is removed. `ordnance.recount` rebuilds the table after a configuration change.
+- **Fire doctrine.** `surface_state.engagements[key]` counts interceptors in flight per target (`m<missile id>` or `d<drone unit>`). A shot releases its count when it hits, misses, self-destructs or is removed. `ordnance.recount` rebuilds the table after a configuration change. A launcher keeps its lock (and stays aimed for shoot-look-shoot) unless the locked target is saturated and another target in range is not.
 - **Magazines.** `launcher_rounds[unit] = {rounds, reload_tick}`; one canister returns every `ABM_RELOAD_TICKS`. Interceptor items are consumed only on launch.
 - **Derived caches are not authoritative.** `defense.lua` caches positions of fixed batteries and radars in a module-local table; each missile stores the launchers that can reach it (`missile.launchers`, refreshed every 30 ticks with its radar coverage). Both are rebuilt identically on every peer, so they never cause desyncs; anything that moves batteries or radars by script must not rely on them.
+- **Force merges.** Per-force tables are keyed by force index. `on_forces_merged` moves planning state, threats and range overlays to the destination force and rescans targets, so a reused force index never inherits stale lists.
 - **Ballistic classes** are fixed per missile at launch (`missile.class`); missiles from older saves are treated as heavy.
 - **Ground turrets ignore aircraft.** `prototypes/ground_defense.lua` applies to every ammo, electric and fluid turret not created by this mod, and gives turret-fired ammunition ground-only damage types to which drones are immune.
 

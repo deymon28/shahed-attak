@@ -108,6 +108,13 @@ function range_overlay.refresh()
   end
 end
 
+function range_overlay.on_forces_merged(source_index, destination_index)
+  for _, record in pairs(state.root().range_renders) do
+    if record.force_index == source_index then record.force_index = destination_index end
+  end
+  range_overlay.refresh()
+end
+
 function range_overlay.initialize()
   for _, surface in pairs(game.surfaces) do
     if state.supported(surface) then

@@ -102,4 +102,31 @@ battery.energy = 0
 for tick = 5101, 5200 do game.tick = tick; defense.try_intercepts(target, current) end
 h.check(stock(battery) == stock_before, "fixed batteries need 10 MJ")
 
+-- Salvo: launchers that cannot add to a saturated target turn to the next
+-- missile instead of holding their lock.
+h.reset()
+current = h.surface_state()
+defense = require("scripts.defense")
+ordnance = require("scripts.ordnance")
+local salvo_batteries = {}
+for i = 1, 6 do
+  local launcher = h.entity({name = "shahed-attack-abm-battery", position = {x = 0, y = 0},
+    energy = 1e9, inventory = h.inventory({["shahed-attack-interceptor"] = 10})})
+  defense.on_entity_created(launcher)
+  salvo_batteries[i] = launcher
+end
+local salvo = {}
+for id = 1, 3 do
+  salvo[id] = {id = id, force_index = 1, position = {x = 100, y = id * 2}, class = "medium"}
+  current.active_missiles[id] = salvo[id]
+end
+for tick = 1, 60 do
+  game.tick = tick
+  for id = 1, 3 do defense.try_intercepts(salvo[id], current) end
+end
+for id = 1, 3 do
+  h.check(ordnance.engaged(current, "m" .. id) == 2, "every salvo missile is engaged by two interceptors (m"
+    .. id .. ": " .. ordnance.engaged(current, "m" .. id) .. ")")
+end
+
 h.pass("ABM acquisition, fire doctrine, shoot-look-shoot, magazines, range and costs")

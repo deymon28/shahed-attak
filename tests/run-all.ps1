@@ -17,6 +17,8 @@ $scenarios = @(
     "integration-test",
     "integration-targeting",
     "integration-force",
+    "integration-force-merge",
+    "integration-remote-before-init",
     "integration-raid-cap",
     "integration-navigation",
     "integration-formation",
@@ -73,6 +75,8 @@ try {
     & ".\tests\migration.ps1" -FactorioExe $FactorioExe -OldVersion "0.6.0" -TimeoutSeconds 90
 
     & ".\tests\migration.ps1" -FactorioExe $FactorioExe -OldVersion "0.6.7" -TimeoutSeconds 120
+
+    & ".\tests\migration.ps1" -FactorioExe $FactorioExe -OldVersion "0.7.0" -TimeoutSeconds 120
 
     Write-Output "PASS: Shahed Attack full verification completed."
 }

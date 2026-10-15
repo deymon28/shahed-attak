@@ -302,6 +302,22 @@ function targeting.get_candidate_forces(surface)
   return result
 end
 
+-- After game.merge_forces the absorbed force's buildings belong to the
+-- destination force: drop the old lists and rescan every surface.
+function targeting.on_forces_merged(source_index)
+  local root = state.root()
+  for _, surface_targets in pairs(root.targets) do
+    surface_targets[source_index] = nil
+  end
+  for registration, record in pairs(root.target_registrations) do
+    if record.force_index == source_index then root.target_registrations[registration] = nil end
+  end
+  for _, surface in pairs(game.surfaces) do
+    root.scan_queue[surface.index] = nil
+    targeting.queue_surface_scan(surface)
+  end
+end
+
 function targeting.count(surface_index, force_index)
   local list = force_list(surface_index, force_index, false)
   return list and #list.entities or 0

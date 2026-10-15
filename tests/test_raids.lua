@@ -137,14 +137,23 @@ local wagon = h.entity({name = "shahed-attack-aa-wagon", position = {x = 0, y = 
 defense.on_entity_created(wagon)
 local target = h.entity({name = "shahed-attack-strike-drone", position = {x = 0, y = -20}, force = h.air_force, speed = 0.08})
 current.active_drones[target.unit_number] = {entity = target, kind = "strike", target_force_index = 1}
+local seen_engaging = false
 for tick = game.tick + 1, game.tick + 400 do
   game.tick = tick
   defense.update_drone_intercepts(tick)
   ordnance.update(tick)
+  if current.counters.flak_shots == 3 then
+    seen_engaging = seen_engaging or defense.wagon_status(wagon).key == "engaging-drone"
+  end
 end
 h.check(current.counters.flak_shots >= 10, "AA wagon fires at drones in range")
 h.check(wagon.inventory.get_item_count("shahed-attack-flak-magazine") == 0, "flak magazines are consumed")
 h.check(defense.wagon_status(wagon).rounds < 10, "rounds counted down")
+h.check(seen_engaging, "panel shows the engagement")
+h.check(defense.wagon_status(wagon).key == "no-ammo", "empty wagon reports missing ammunition")
+current.active_drones[target.unit_number] = nil
+wagon.inventory.items["shahed-attack-flak-magazine"] = 2
+h.check(defense.wagon_status(wagon).key == "ready", "reloaded wagon is ready without drones in the air")
 local frame = current.wagon_state[wagon.unit_number].head.animation_offset
 h.check(frame == 0, "turret head points north at the target")
 

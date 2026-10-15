@@ -118,4 +118,44 @@ for _, record in pairs(current.active_drones) do
   h.check(record.kind ~= "recon", "recon disabled: no reconnaissance drones")
 end
 
+-- Admin cleanup removes queued salvo missiles as well as flying ones.
+local ballistics = require("scripts.ballistics")
+local site = h.nauvis.find_entities_filtered({name = "shahed-attack-ballistic-site"})[1]
+local site_target = h.nauvis.find_entities_filtered({type = "assembling-machine"})[1]
+ballistics.clear(current)
+director.launch_salvo(h.nauvis, current, h.player_force, site_target, require("scripts.lib.random").new(9), 3, site)
+h.check(queued("ballistic") == 2, "scripted salvo queues the rest of the missiles")
+local salvo_ids = {}
+for _, missile in pairs(current.active_missiles) do salvo_ids[missile.salvo_id or "none"] = true end
+for _, pending in pairs(current.pending_events) do
+  if pending.kind == "ballistic" then salvo_ids[pending.salvo_id or "none"] = true end
+end
+h.check(not salvo_ids.none, "scripted salvo missiles share a salvo id")
+ballistics.clear(current)
+h.check(missiles() == 0 and queued("ballistic") == 0, "clear removes queued salvo missiles")
+
+-- Peaceful mode switched on during the game stops natural attacks.
+require("scripts.raids").clear(current)
+h.nauvis.peaceful_mode = true
+current.next_raid_tick = 0
+current.next_ballistic_tick = 0
+game.tick = game.tick + 600
+director.update(game.tick)
+h.check(count_drones() == 0 and missiles() == 0 and queued("ballistic") == 0, "no natural attacks in peaceful mode")
+h.nauvis.peaceful_mode = false
+
+-- A grace period shorter than two days is honoured on a new world.
+h.reset()
+settings.global["shahed-attack-grace-period-days"] = {value = 0.5}
+current = h.surface_state()
+director = require("scripts.director")
+director.initialize()
+h.check(current.next_raid_tick == math.floor(0.5 * DAY), "first raid scheduled at the end of a short grace period")
+settings.global["shahed-attack-grace-period-days"] = {value = 5}
+h.reset()
+settings.global["shahed-attack-grace-period-days"] = {value = 5}
+current = h.surface_state()
+require("scripts.director").initialize()
+h.check(current.next_raid_tick == 5 * DAY, "long grace period delays the first raid")
+
 h.pass("grace period, ballistic gates, toggles, salvo growth and staggered launches")

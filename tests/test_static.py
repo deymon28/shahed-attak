@@ -53,7 +53,7 @@ def test_required_mod_files_exist():
 def test_mod_metadata_targets_factorio_2_0_77():
     metadata = json.loads((ROOT / "info.json.in").read_text(encoding="utf-8"))
     assert metadata["name"] == "shahed-attack"
-    assert metadata["version"] == "0.7.0"
+    assert metadata["version"] == "0.7.1"
     assert metadata["factorio_version"] == "2.0"
     assert "base >= 2.0.77" in metadata["dependencies"]
 
@@ -291,7 +291,7 @@ def test_migration_artifacts_and_immutable_031_fixture_exist():
 def test_readme_documents_the_current_interfaces():
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     for phrase in [
-        "0.7.0",
+        "0.7.1",
         "both",
         "global-sound",
         "circuit-only",
@@ -318,6 +318,8 @@ def test_full_runner_lists_all_runtime_scenarios_once():
         "integration-test",
         "integration-targeting",
         "integration-force",
+        "integration-force-merge",
+        "integration-remote-before-init",
         "integration-raid-cap",
         "integration-navigation",
         "integration-formation",

@@ -60,8 +60,13 @@ script.on_nth_tick(60, function(event)
       fail("strike drone diverted toward the player character")
     end
   elseif event.tick == 720 then
-    if target.valid then
-      fail("strike drone did not reach and attack the production building")
+    -- Two 140-damage strike warheads may leave a 300 HP assembler barely
+    -- alive (fire decides), so a direct hit is checked, not destruction.
+    local state = remote.call("shahed_attack", "get_surface_state", 1)
+    if state.counters.drone_impacts < 1
+      or (target.valid and target.health > target.max_health - 140) then
+      fail(string.format("strike drone did not reach and attack the production building: health=%s impacts=%d",
+        target.valid and string.format("%.1f", target.health) or "destroyed", state.counters.drone_impacts))
     end
     if not decoy.valid then
       fail("strike drone attacked the player character")

@@ -92,7 +92,11 @@ local function run(event)
     reply(player, status_message(surface, surface_state))
     return
   elseif subcommand == "stats" then
-    if player then stats_gui.open(player) end
+    if player then
+      stats_gui.open(player)
+    else
+      reply(nil, status_message(surface, surface_state))
+    end
     return
   elseif subcommand == "sources" then
     reply(player, {"shahed-attack-message.sources",
@@ -177,6 +181,10 @@ local function remote_schedule(request)
     if not source then
       return {ok = false, error = "no-source"}
     end
+  end
+
+  if not source and #infrastructure.sources_in_range(surface_state, source_type, target.position) == 0 then
+    infrastructure.discover(surface, source_type)
   end
 
   local event_id, error_message
